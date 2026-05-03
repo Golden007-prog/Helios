@@ -1,0 +1,36 @@
+# BankDemo Performance Availability Cluster — pre-prod validation.
+# Source: 01_BankDemo/scripts/config/env_mfdbfh.json. Used by the JJSCAN+
+# four-rule fixture ZBNKBAT1.jcl when promoted from bnk_test_vsam.
+name: bnk_pac
+tier: uat
+hlq: MFI01P.MFIDEMO
+db2:
+  subsystem_id: DB20
+  plan_collection: MFIDEMO_P
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: BNKPAC
+jes:
+  class: A
+  sysout_class: X
+scheduler_queue: BATCH_PAC
+volser_pattern: PAC*
+gdg_retention: 7
+protected_resources:
+  - BNKACC
+  - BNKCUST
+  - BNKTXN
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90
+gating:
+  override_required_role: tech_lead
+source_pack: bankdemo
+language_scope: [cobol, pli]
+storage_backend: postgres
+proclibs: [bankdemo_proclib_pac]
+copylibs: [bankdemo_copylib_pac]
+db2_bound_plans: [BNKEXTP]
+description: BankDemo PAC cluster; PostgreSQL backend; tech-lead gate; second-on-screen JJSCAN+ rule fixture target.

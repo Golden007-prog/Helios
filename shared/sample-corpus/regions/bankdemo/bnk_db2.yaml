@@ -1,0 +1,36 @@
+# BankDemo DB2-dialect region — uses the DB2_DDL/ schemas.
+# Language scope is COBOL only (this region's PROCLIB is the standard
+# IGYWC-family compile/link/go procs from the OMP labs, not the BankDemo
+# YBATTSO/YBNKEXTD/YBNKPRT1 chain). Pairs with bnk_xdb for the
+# Schema-Atlas DDL diff demo (Scenario S4).
+name: bnk_db2
+tier: integration
+hlq: MFI01D2.MFIDEMO
+db2:
+  subsystem_id: DB10
+  plan_collection: MFIDEMO_D2
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: BNKDB2
+jes:
+  class: T
+  sysout_class: X
+scheduler_queue: BATCH_DB2
+volser_pattern: DB2*
+gdg_retention: 5
+protected_resources: [BNKACC, BNKCUST]
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90
+gating:
+  override_required_role: developer
+source_pack: bankdemo
+language_scope: [cobol]
+storage_backend: db2
+sql_dialect: db2
+proclibs: [omp_proclib]
+copylibs: [bankdemo_copylib]
+db2_bound_plans: []
+description: BankDemo DB2-dialect region; COBOL-only; OMP-style PROCLIB; pairs with bnk_xdb for the schema-diff demo.

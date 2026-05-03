@@ -30,7 +30,16 @@ jobs:
         env:
           GITHUB_PAGES: "true"
           PAGES_BASE_PATH: /Helios
-          NEXT_PUBLIC_USE_MSW: "true"
+          # MSW stays default-on so the deployed Pages site demos the full
+          # 62 -> 94 -> 100 trajectory + four hero shots without depending on
+          # a publicly-reachable backend. Set repo variable HELIOS_USE_MSW
+          # to "false" to bake real API calls instead.
+          NEXT_PUBLIC_USE_MSW: ${{ vars.HELIOS_USE_MSW || 'true' }}
+          # Baked into the bundle for the case where MSW is bypassed at
+          # runtime. Set repo variable HELIOS_BACKEND_URL to the public
+          # backend URL when one exists; otherwise the default routes API
+          # calls to the local Docker container on the demo machine.
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.HELIOS_BACKEND_URL || 'http://localhost:8081' }}
         run: npm run build
       - name: Add .nojekyll
         run: touch out/.nojekyll

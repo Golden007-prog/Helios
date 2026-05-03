@@ -109,8 +109,39 @@ migrate-rollback: ## Delete every Mango design doc owned by the migration (no da
 	cd backend && $(PYTHON) -m migrations.apply_indexes --rollback
 
 .PHONY: seed
-seed: migrate ## Apply indexes + seed the MeridianBank demo corpus
+seed: migrate seed-bankdemo seed-omp seed-cobolcheck ## Apply indexes + seed all 3 datasets into shop meridianbank.demo
+
+.PHONY: seed-legacy
+seed-legacy: migrate ## Seed the legacy abstract MeridianBank corpus (shop meridianbank)
 	cd backend && $(PYTHON) -m migrations.seed_demo
+
+.PHONY: seed-bankdemo
+seed-bankdemo: ## Seed only the BankDemo dataset (Rocket EULA)
+	cd backend && $(PYTHON) -m migrations.seed_corpus --pack bankdemo
+
+.PHONY: seed-omp
+seed-omp: ## Seed only the OMP COBOL Course dataset (CC-BY-4.0)
+	cd backend && $(PYTHON) -m migrations.seed_corpus --pack omp_course
+
+.PHONY: seed-cobolcheck
+seed-cobolcheck: ## Seed only the cobol-check dataset (Apache 2.0)
+	cd backend && $(PYTHON) -m migrations.seed_corpus --pack cobol_check
+
+.PHONY: seed-reset
+seed-reset: ## Wipe shop meridianbank.demo and re-seed all 3 datasets
+	cd backend && $(PYTHON) -m migrations.seed_corpus --reset
+
+.PHONY: verify-corpus
+verify-corpus: ## Run the end-to-end corpus assertions in backend/tests/test_corpus_e2e.py
+	cd backend && $(PYTHON) -m pytest tests/test_corpus_e2e.py -v --tb=short
+
+.PHONY: calibrate
+calibrate: ## Run the Confidence Score calibration bench across all scenarios
+	$(PYTHON) -m bench.calibrate_confidence
+
+.PHONY: calibrate-report
+calibrate-report: calibrate ## Regenerate docs/CALIBRATION_REPORT.md (gitignored)
+	@echo "→ docs/CALIBRATION_REPORT.md updated"
 
 # ---- docker --------------------------------------------------------------
 

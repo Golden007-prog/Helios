@@ -1,0 +1,35 @@
+# BankDemo XDB-dialect region — uses the XDB_DDL/ schemas, distinct catalog.
+# Language scope is COBOL + PL/I (the PL/I main programs link with the
+# XDB BIND step). Pairs with bnk_db2 for the Schema-Atlas DDL diff demo
+# (Scenario S4): same 9 tables, two SQL dialects.
+name: bnk_xdb
+tier: integration
+hlq: MFI01X.MFIDEMO
+db2:
+  subsystem_id: XDB1
+  plan_collection: MFIDEMO_X
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: BNKXDB
+jes:
+  class: T
+  sysout_class: X
+scheduler_queue: BATCH_XDB
+volser_pattern: XDB*
+gdg_retention: 5
+protected_resources: [BNKACC, BNKCUST]
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90
+gating:
+  override_required_role: developer
+source_pack: bankdemo
+language_scope: [cobol, pli]
+storage_backend: xdb
+sql_dialect: xdb
+proclibs: [bankdemo_proclib]
+copylibs: [bankdemo_copylib]
+db2_bound_plans: []
+description: BankDemo XDB-dialect region; COBOL + PL/I; distinct catalog from bnk_db2.

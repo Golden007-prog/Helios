@@ -1,0 +1,43 @@
+# Training integration — the OMP COBOL Programming Course corpus.
+# Sandbox-only: empty protected resources, permissive gating, anyone can
+# self-promote. This is the "developer demo lane" alongside the
+# enterprise BankDemo lane — judges see Helios works for non-scary cases
+# too. Used by Scenario S5 (CBL0106J.jcl self-promote).
+name: training_int
+tier: integration
+hlq: MERIDOPS.TRAIN
+db2:
+  subsystem_id: DSNC10
+  plan_collection: TRAIN_INT
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: TRAIN
+jes:
+  class: A
+  sysout_class: A
+scheduler_queue: BATCH_TRAIN
+volser_pattern: TRN*
+gdg_retention: 1
+protected_resources: []
+confidence_weight_overrides:
+  critical: 10
+  high: 5
+  medium: 2
+  low: 1
+  backup_gap: 5
+review:
+  auto_approve_threshold: 70
+gating:
+  override_required_role: developer
+  green_threshold: 70
+  amber_threshold: 50
+source_pack: omp_course
+language_scope: [cobol]
+storage_backend: db2
+sql_dialect: db2
+proclibs: [omp_proclib]
+copylibs: [omp_copylib]
+db2_bound_plans: [CBLDB21, CBLDB22, CBLDB23]
+description: OMP COBOL Course training sandbox; permissive gating; isolated user MERIDOPS; the "easy lane" demo region.

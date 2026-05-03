@@ -24,6 +24,8 @@ export const queryKeys = {
   },
   score: {
     weights: (region: string) => ["score", "weights", region] as const,
+    compute: (jclName: string, region: string) =>
+      ["score", "compute", jclName, region] as const,
   },
   queue: {
     all: () => ["queue"] as const,

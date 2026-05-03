@@ -1,8 +1,11 @@
 # MeridianBank int3 — release-validation tier.
-# 7 fields differ from int2 (the substitution surface): hlq, db2.subsystem_id,
-# db2.plan_collection, racf_group, jes.class, jes.sysout_class, scheduler_queue.
-# protected_resources also adds CUST.MASTER (drives the backup-gap finding in
-# Scene 1 of docs/PERSONA_MAYA.md) and confidence weights tighten by 1.5×.
+# Exactly 7 substitution-surface fields differ from int2.yaml: hlq,
+# db2.subsystem_id, db2.plan_collection, racf_group, jes.class,
+# jes.sysout_class, scheduler_queue. protected_resources includes
+# CUST.MASTER (drives the backup-gap finding in Scene 1 of
+# docs/PERSONA_MAYA.md) and confidence weights tighten by 1.5×; both
+# of those are kept in sync with int2.yaml so they don't show up in the
+# 7-field demo diff.
 name: int3
 tier: integration
 hlq: CUST.INT3
@@ -18,12 +21,16 @@ jes:
   class: P
   sysout_class: S
 scheduler_queue: BATCH_INT
-volser_pattern: INT3*
+volser_pattern: INT*
 gdg_retention: 30
 protected_resources:
   - CUST.MASTER
-confidence_weight_overrides:
-  critical: 37
-  high: 15
+confidence_weight_overrides: {}
+# Programs whose copybooks have known version drift between int2 and int3.
+# CopybookDriftRule fires HIGH when the JCL invokes one of these via
+# ``RUN PROGRAM(...)``. extras don't appear in the diff_regions output
+# (the engine walks declared fields only).
+known_drift_programs:
+  - CUSTDEL
 review:
   auto_approve_threshold: 90

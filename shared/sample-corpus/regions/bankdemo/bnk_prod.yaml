@@ -1,0 +1,43 @@
+# BankDemo production — the strictest gate; backup-gap is fatal here.
+# Hero promote target for ZBNKDEL.jcl (62 → 94 → 100 trajectory).
+name: bnk_prod
+tier: production
+hlq: MFI01.MFIDEMO
+db2:
+  subsystem_id: DB30
+  plan_collection: MFIDEMO_P
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: BNKPROD
+jes:
+  class: P
+  sysout_class: X
+scheduler_queue: BATCH_PROD
+volser_pattern: PRD*
+gdg_retention: 14
+protected_resources:
+  - BNKACC
+  - BNKCUST
+  - BNKTXN
+  - BNKHELP
+  - BNKATYPE
+  - BNKACC.PATH3
+confidence_weight_overrides:
+  critical: 50
+  backup_gap: 60
+  high: 20
+review:
+  auto_approve_threshold: 100
+gating:
+  override_required_role: release_manager
+  green_threshold: 90
+  amber_threshold: 70
+source_pack: bankdemo
+language_scope: [cobol, pli]
+storage_backend: postgres
+proclibs: [bankdemo_proclib_prod]
+copylibs: [bankdemo_copylib_prod]
+db2_bound_plans: [BNKEXTP, BNKPRTP]
+description: BankDemo production; release-manager gate; hero promote target for ZBNKDEL.jcl backup_gap demo.

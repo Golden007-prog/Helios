@@ -1,0 +1,36 @@
+# BankDemo integration test — PostgreSQL via MFDBFH.
+# Source: 01_BankDemo/scripts/config/env_pg_pac.json. Same logical region
+# as bnk_test_vsam but with a SQL storage backend, exercising the SQL
+# COBOL programs under sources/cobol/data/sql/.
+name: bnk_test_sql
+tier: integration
+hlq: MFI01T.MFIDEMO
+db2:
+  subsystem_id: DB10
+  plan_collection: MFIDEMO_T
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: BNKDEV
+jes:
+  class: T
+  sysout_class: X
+scheduler_queue: BATCH_TEST
+volser_pattern: TST*
+gdg_retention: 5
+protected_resources:
+  - bankdemo
+  - CTLCARDS
+  - EXTLIB
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90
+gating:
+  override_required_role: developer
+source_pack: bankdemo
+language_scope: [cobol, pli]
+storage_backend: postgres
+proclibs: [bankdemo_proclib]
+copylibs: [bankdemo_copylib]
+description: BankDemo integration test, PostgreSQL backend (MFDBFH); SQL-variant programs.

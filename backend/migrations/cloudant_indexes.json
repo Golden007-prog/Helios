@@ -192,6 +192,78 @@
         "type": "json",
         "index": { "fields": ["shop", "state", "ts_unix_ms"] }
       }
+    },
+    {
+      "db": "cobol_artifacts",
+      "index": {
+        "name": "by-shop-pack-program",
+        "type": "json",
+        "index": { "fields": ["shop", "source_pack", "program_id"] }
+      }
+    },
+    {
+      "db": "pli_artifacts",
+      "index": {
+        "name": "by-shop-pack-procedure",
+        "type": "json",
+        "index": { "fields": ["shop", "source_pack", "procedure_name"] }
+      }
+    },
+    {
+      "db": "copybook_artifacts",
+      "index": {
+        "name": "by-shop-pack-name-version",
+        "type": "json",
+        "index": { "fields": ["shop", "source_pack", "name", "version"] }
+      }
+    },
+    {
+      "db": "copybook_artifacts",
+      "index": {
+        "name": "by-shop-library",
+        "type": "json",
+        "index": { "fields": ["shop", "library_id", "name"] }
+      }
+    },
+    {
+      "db": "proc_artifacts",
+      "index": {
+        "name": "by-shop-library-member",
+        "type": "json",
+        "index": { "fields": ["shop", "library_id", "member"] }
+      }
+    },
+    {
+      "db": "sql_ddl_artifacts",
+      "index": {
+        "name": "by-shop-dialect-table",
+        "type": "json",
+        "index": { "fields": ["shop", "dialect", "table"] }
+      }
+    },
+    {
+      "db": "test_fixtures",
+      "index": {
+        "name": "by-shop-rule-kind",
+        "type": "json",
+        "index": { "fields": ["shop", "rule_id", "kind"] }
+      }
+    },
+    {
+      "db": "demo_scenarios",
+      "index": {
+        "name": "by-shop-id",
+        "type": "json",
+        "index": { "fields": ["shop", "scenario_id"] }
+      }
+    },
+    {
+      "db": "corpus_index",
+      "index": {
+        "name": "by-shop",
+        "type": "json",
+        "index": { "fields": ["shop"] }
+      }
     }
   ]
 }

@@ -2,9 +2,16 @@ import { http, HttpResponse } from "msw";
 import {
   ANIL,
   HERO_ABEND,
+  HERO_ABEND_ANALYSIS,
+  HERO_COBOL_SOURCE,
+  HERO_DIFF,
   HERO_FINDINGS,
   HERO_JCL_SOURCE,
   HERO_QUEUE,
+  HERO_SCORE_BREAKDOWN_100,
+  HERO_SCORE_BREAKDOWN_62,
+  HERO_SCORE_BREAKDOWN_94,
+  HERO_SYSLOG_RAW,
   MAYA,
   REGIONS,
   REGION_PROFILES,
@@ -16,29 +23,19 @@ function envelope<T>(data: T) {
   return HttpResponse.json({ ok: true, data, request_id: "req:mock" });
 }
 
-function bobStub(message: string) {
-  return HttpResponse.json(
-    {
-      ok: false,
-      error: {
-        code: "NOT_IMPLEMENTED",
-        message: `BOB: ${message}`,
-        details: { reserved_for: "Bob" },
-      },
-      request_id: "req:mock",
-    },
-    { status: 501 },
-  );
-}
-
 export const handlers = [
-  // --- Health
+  // --- Health -----------------------------------------------------------
   http.get(`${API}/healthz`, () => envelope({ status: "ok" })),
   http.get(`${API}/version`, () =>
-    envelope({ version: "0.1.0-mock", git_sha: "mock", build_time: "now", image_tag: "mock" }),
+    envelope({
+      version: "0.1.0-mock",
+      git_sha: "mock",
+      build_time: "now",
+      image_tag: "mock",
+    }),
   ),
 
-  // --- Auth
+  // --- Auth -------------------------------------------------------------
   http.post(`${API}/auth/login`, async ({ request }) => {
     const body = (await request.json()) as { email: string; password: string };
     if (body.password !== "helios2026") {
@@ -61,8 +58,10 @@ export const handlers = [
   http.post(`${API}/auth/logout`, () => new HttpResponse(null, { status: 204 })),
   http.get(`${API}/auth/me`, () => envelope({ user: MAYA })),
 
-  // --- Regions
-  http.get(`${API}/api/regions`, () => envelope({ regions: REGIONS, total: REGIONS.length })),
+  // --- Regions ----------------------------------------------------------
+  http.get(`${API}/api/regions`, () =>
+    envelope({ regions: REGIONS, total: REGIONS.length }),
+  ),
   http.get(`${API}/api/regions/:name`, ({ params }) => {
     const profile = REGION_PROFILES[params.name as string];
     return profile
@@ -70,7 +69,10 @@ export const handlers = [
       : HttpResponse.json(
           {
             ok: false,
-            error: { code: "REGION_NOT_FOUND", message: `No region named '${params.name}'` },
+            error: {
+              code: "REGION_NOT_FOUND",
+              message: `No region named '${params.name}'`,
+            },
             request_id: "req:mock",
           },
           { status: 404 },
@@ -83,13 +85,27 @@ export const handlers = [
       review_required: false,
     }),
   ),
-  http.get(`${API}/api/regions/:a/diff/:b`, () =>
-    bobStub("region diff renderer + algorithm reserved for Bob (docs/PHASE_PLAN.md §1.2)"),
-  ),
+  // Hero-shot diff: the canonical 7 substitution-surface fields between
+  // int2 and int3. For any other (a, b) combination return an empty diff
+  // so the UI shows the "All fields aligned" path.
+  http.get(`${API}/api/regions/:a/diff/:b`, ({ params }) => {
+    const a = params.a as string;
+    const b = params.b as string;
+    const isHeroPair =
+      (a === "int2" && b === "int3") || (a === "int3" && b === "int2");
+    return envelope({
+      a,
+      b,
+      fields: isHeroPair ? HERO_DIFF : [],
+    });
+  }),
 
-  // --- JJSCAN+
+  // --- JJSCAN+ ----------------------------------------------------------
   http.post(`${API}/api/scan`, () =>
-    bobStub("JJSCAN+ analyzer core reserved for Bob (docs/PHASE_PLAN.md §1.3)"),
+    envelope({
+      findings: HERO_FINDINGS,
+      scan_duration_ms: 42,
+    }),
   ),
   http.get(`${API}/api/scan/:id`, () =>
     envelope({
@@ -102,28 +118,112 @@ export const handlers = [
       findings: HERO_FINDINGS,
     }),
   ),
-
-  // --- Score
-  http.post(`${API}/api/score`, () =>
-    bobStub("Confidence Score formula reserved for Bob (docs/CONFIDENCE_SCORE.md)"),
+  http.post(`${API}/api/scan/findings/:id/decide`, ({ params }) =>
+    envelope({
+      finding_id: params.id as string,
+      state: "dismissed",
+      decided_at: new Date().toISOString(),
+      audit_event_id: "audit:mock-decide",
+      learning_event_id: "learn:mock-decide",
+    }),
+  ),
+  http.post(`${API}/api/scan/findings/:id/auto-fix`, ({ params }) =>
+    envelope({
+      finding_id: params.id as string,
+      applied: true,
+      diff: "// auto-fix applied (mock)",
+    }),
   ),
 
-  // --- Promote
+  // --- Score ------------------------------------------------------------
+  // Toggle the Maya trajectory off the request body: by default we return
+  // the 62 score; when the request payload includes "applied_fixes" the
+  // mock walks 62 → 94 → 100. The frontend confidence page can drive this
+  // to demo the auto-fix flow without a backend.
+  http.post(`${API}/api/score`, async ({ request }) => {
+    let appliedFixes: string[] = [];
+    try {
+      const body = (await request.json()) as {
+        applied_fixes?: string[];
+      } | null;
+      appliedFixes = body?.applied_fixes ?? [];
+    } catch {
+      // body might be a different shape — that's fine.
+    }
+    if (appliedFixes.length >= 2) {
+      return envelope({ score: 100, breakdown: HERO_SCORE_BREAKDOWN_100 });
+    }
+    if (appliedFixes.includes("backup_gap")) {
+      return envelope({ score: 94, breakdown: HERO_SCORE_BREAKDOWN_94 });
+    }
+    return envelope({ score: 62, breakdown: HERO_SCORE_BREAKDOWN_62 });
+  }),
+  http.get(`${API}/api/score/weights/:region`, ({ params }) =>
+    envelope({
+      region: params.region as string,
+      weights: { critical: 25, high: 10, medium: 5, low: 2, info: 0 },
+      source: "default",
+    }),
+  ),
+
+  // --- Promote ----------------------------------------------------------
   http.post(`${API}/api/promote`, () =>
-    bobStub("Promote depends on score + diff — both reserved for Bob"),
+    envelope({
+      promote_event_id: "audit:mock-promote",
+      audit_event_id: "audit:mock-promote",
+      diff: HERO_DIFF,
+      confidence_score: 62,
+      confidence_breakdown: {
+        base: 100,
+        "deduction.backup_gap": 30,
+        "deduction.jjscan_high": 10,
+        "boost.soft_rounding": 2,
+      },
+      auto_fixes_applied: [],
+      auto_fixes_available_but_not_applied: [
+        { fix: "generate_paired_backup", target: "PROD.INT3.CUST.MASTER" },
+      ],
+      state: "pending_review",
+      reviewer: "required",
+    }),
   ),
 
-  // --- ABEND
-  http.post(`${API}/api/abend`, () =>
-    bobStub("ABEND classifier inference pipeline reserved for Bob (docs/PHASE_PLAN.md §1.4)"),
-  ),
+  // --- ABEND ------------------------------------------------------------
+  http.post(`${API}/api/abend`, () => envelope(HERO_ABEND_ANALYSIS)),
   http.get(`${API}/api/abend/history`, () => envelope({ events: [HERO_ABEND] })),
-  http.get(`${API}/api/abend/:id`, () => envelope(HERO_ABEND)),
+  http.get(`${API}/api/abend/:id`, () =>
+    envelope({
+      ...HERO_ABEND_ANALYSIS,
+      raw_text: HERO_SYSLOG_RAW,
+      source_text: HERO_COBOL_SOURCE,
+    }),
+  ),
+  http.post(`${API}/api/abend/:id/resolve`, ({ params }) =>
+    envelope({
+      event_id: params.id as string,
+      audit_event_id: "audit:mock-resolve",
+      learning_event_id: "learn:mock-resolve",
+    }),
+  ),
 
-  // --- Queue
+  // --- Queue ------------------------------------------------------------
   http.get(`${API}/api/queue`, () => envelope({ items: HERO_QUEUE })),
+  http.post(`${API}/api/queue/:id/approve`, ({ params }) =>
+    envelope({
+      event_id: params.id as string,
+      state: "approved",
+      audit_event_id: "audit:mock-approve",
+    }),
+  ),
+  http.post(`${API}/api/queue/:id/reject`, ({ params }) =>
+    envelope({
+      event_id: params.id as string,
+      state: "rejected",
+      audit_event_id: "audit:mock-reject",
+    }),
+  ),
 
-  // --- Audit (paginated stub)
+  // --- Audit (paginated stub) -------------------------------------------
   http.get(`${API}/api/audit`, () =>
     envelope({
       items: [
@@ -139,7 +239,7 @@ export const handlers = [
     }),
   ),
 
-  // --- Runbooks
+  // --- Runbooks ---------------------------------------------------------
   http.get(`${API}/api/runbooks`, () =>
     envelope({
       runbooks: [
@@ -154,7 +254,7 @@ export const handlers = [
     }),
   ),
 
-  // --- Sample JCL source for the Studio mock
+  // --- Sample JCL source for the Studio mock ----------------------------
   http.get(`${API}/api/jcl/CUST_DELETE_INACTIVE`, () =>
     envelope({ name: "CUST_DELETE_INACTIVE", source: HERO_JCL_SOURCE }),
   ),

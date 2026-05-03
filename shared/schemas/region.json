@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helios.local/schemas/region.json",
+  "title": "Helios region profile",
+  "description": "Shape of one region YAML under shared/sample-corpus/regions/. Validated by backend/tests/test_region_yamls.py at seed-prep time. Mirrors backend/app/models/region.py so the seed and the API agree.",
+  "type": "object",
+  "required": ["name", "tier", "hlq"],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["development", "integration", "qa", "uat", "production"]
+    },
+    "hlq": { "type": "string", "minLength": 1 },
+    "db2": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["subsystem_id", "plan_collection"],
+          "properties": {
+            "subsystem_id": { "type": "string" },
+            "plan_collection": { "type": "string" },
+            "default_bind": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "racf_group": { "type": "string" },
+    "jes": {
+      "type": "object",
+      "required": ["class", "sysout_class"],
+      "properties": {
+        "class": { "type": "string", "minLength": 1, "maxLength": 8 },
+        "sysout_class": { "type": "string", "minLength": 1, "maxLength": 8 }
+      }
+    },
+    "scheduler_queue": { "type": "string" },
+    "volser_pattern": { "type": "string" },
+    "gdg_retention": { "type": "integer", "minimum": 0 },
+    "protected_resources": { "type": "array", "items": { "type": "string" } },
+    "confidence_weight_overrides": { "type": "object" },
+    "review": {
+      "type": "object",
+      "properties": {
+        "auto_approve_threshold": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "gating": {
+      "type": "object",
+      "properties": {
+        "override_required_role": { "type": "string" },
+        "green_threshold": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "amber_threshold": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "source_pack": {
+      "type": "string",
+      "enum": ["bankdemo", "omp_course", "cobol_check"]
+    },
+    "language_scope": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["cobol", "pli", "assembler"] }
+    },
+    "storage_backend": {
+      "type": "string",
+      "enum": ["vsam", "db2", "postgres", "xdb"]
+    },
+    "sql_dialect": { "type": "string", "enum": ["db2", "xdb"] },
+    "proclibs": { "type": "array", "items": { "type": "string" } },
+    "copylibs": { "type": "array", "items": { "type": "string" } },
+    "db2_bound_plans": { "type": "array", "items": { "type": "string" } },
+    "description": { "type": "string" }
+  }
+}

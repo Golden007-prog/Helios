@@ -1,4 +1,8 @@
 # Helios backend image — Code Engine target.
+#
+# Build with the *repo root* as context so we can pull in the shared corpus
+# the runtime reads (abend patterns, review-queue policy, parser gap log):
+#   docker build -t helios-backend:local -f backend/Dockerfile .
 FROM python:3.11-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -14,13 +18,21 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Python deps first for layer caching.
-COPY pyproject.toml /app/pyproject.toml
+COPY backend/pyproject.toml /app/pyproject.toml
 RUN pip install --upgrade pip \
  && pip install -e .
 
 # Source.
-COPY app /app/app
-COPY migrations /app/migrations
+COPY backend/app /app/app
+COPY backend/migrations /app/migrations
+
+# Runtime corpus the backend reads:
+#   - shared/sample-corpus/abend_patterns/patterns.yaml  (abend classifier)
+#   - shared/config/review_queue_defaults.yaml           (review policy)
+# The parser gap log at /app/docs/PARSER_GAPS.md is created on-demand by
+# the runtime; we just need the parent dir to exist + be writable.
+COPY shared /app/shared
+RUN mkdir -p /app/docs
 
 # Build metadata — set by CI via --build-arg.
 ARG HELIOS_GIT_SHA=unknown
@@ -30,8 +42,11 @@ ENV HELIOS_GIT_SHA=${HELIOS_GIT_SHA} \
     HELIOS_BUILD_TIME=${HELIOS_BUILD_TIME} \
     HELIOS_IMAGE_TAG=${HELIOS_IMAGE_TAG}
 
-# Non-root user.
-RUN useradd -m -u 1001 helios
+# Non-root user. The /app/docs path needs to be writable so the gap logger
+# can flush at shutdown (PARSER_GAPS.md is mostly read-only at runtime, but
+# the logger appends if a parser surfaces something new).
+RUN useradd -m -u 1001 helios \
+ && chown -R helios:helios /app/docs
 USER helios
 
 EXPOSE 8080

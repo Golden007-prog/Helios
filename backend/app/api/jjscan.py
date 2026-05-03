@@ -196,8 +196,10 @@ async def auto_fix(
     user: CurrentUser,
     audit: AuditWriter = Depends(get_audit_writer),
 ) -> Envelope[FindingAutoFixResponse]:
+    # TODO(1.3 follow-up): Implement auto-fix application
+    # For now, return a stub response indicating the fix would be applied
     raise BobStubError(
-        "JJSCAN+ auto-fix depends on the rule body that surfaced the finding",
+        "JJSCAN+ auto-fix application is Phase 1.3 follow-up work",
         feature="jjscan.auto_fix",
         spec_doc="docs/JJSCAN_PLUS_RULES.md",
     )

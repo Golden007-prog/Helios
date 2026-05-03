@@ -81,7 +81,9 @@ export default function RegionsPage() {
                 <DialogTitle>Create region</DialogTitle>
               </DialogHeader>
               <RegionForm
-                onSubmit={(values) => create.mutateAsync(values)}
+                onSubmit={async (values) => {
+                  await create.mutateAsync(values);
+                }}
                 submitLabel="Create"
               />
             </DialogContent>

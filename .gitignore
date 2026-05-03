@@ -227,6 +227,8 @@ shared/sample-corpus/bankdemo-derived/
 shared/sample-corpus/abend_examples/
 bench/results/*.json
 docs/ASSUMPTIONS.md
+docs/CALIBRATION_REPORT.md
+docs/PARSER_GAPS.md
 docs/drafts/
 .helios-cache/
 outputs/

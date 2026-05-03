@@ -22,7 +22,12 @@ export default function LoginPage() {
     try {
       await login(email, password);
       toast.success("Signed in");
-      router.push("/");
+      // Honour ?next=… for cases where the auth guard bounced us here.
+      const next =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("next")
+          : null;
+      router.push(next || "/confidence");
     } catch (err) {
       toast.error("Sign-in failed", (err as Error).message);
     } finally {

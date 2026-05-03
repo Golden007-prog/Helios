@@ -13,13 +13,13 @@ interface Props {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { err: null };
+  override state: State = { err: null };
 
   static getDerivedStateFromError(err: Error): State {
     return { err };
   }
 
-  componentDidCatch(err: Error) {
+  override componentDidCatch(err: Error) {
     if (typeof console !== "undefined") {
       console.error("[helios] error boundary caught", err);
     }
@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   reset = () => this.setState({ err: null });
 
-  render() {
+  override render() {
     if (this.state.err) {
       if (this.props.fallback) return this.props.fallback(this.state.err, this.reset);
       return (

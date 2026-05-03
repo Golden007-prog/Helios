@@ -24,8 +24,23 @@ from typing import Any, Literal
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_POLICY_FILE = REPO_ROOT / "shared" / "config" / "review_queue_defaults.yaml"
+def _resolve_default_policy_file() -> Path:
+    """Find the default policy file under either the container layout
+    (``/app/shared/...``) or the dev layout (``<repo>/shared/...``)."""
+    here = Path(__file__).resolve()
+    candidates = [
+        here.parents[2] / "shared" / "config" / "review_queue_defaults.yaml",
+        here.parents[3] / "shared" / "config" / "review_queue_defaults.yaml",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    # Fall back to the dev path so callers get a meaningful error if the
+    # file is genuinely missing.
+    return candidates[1]
+
+
+DEFAULT_POLICY_FILE = _resolve_default_policy_file()
 
 Decision = Literal["auto_approve", "review", "review_with_reason"]
 

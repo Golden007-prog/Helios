@@ -1,0 +1,24 @@
+# BankDemo developer sandbox — VSAM-only, no DB2.
+# Source: 01_BankDemo/scripts/config/env.json. HLQ MFI01D.MFIDEMO,
+# RACF group BNKDEV. Used by the Studio tab for low-risk dev work.
+name: bnk_dev_vsam
+tier: development
+hlq: MFI01D.MFIDEMO
+db2: null
+racf_group: BNKDEV
+jes:
+  class: D
+  sysout_class: A
+scheduler_queue: BATCH_DEV
+volser_pattern: DEV*
+gdg_retention: 5
+protected_resources: []
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90
+source_pack: bankdemo
+language_scope: [cobol, pli]
+storage_backend: vsam
+proclibs: [bankdemo_proclib]
+copylibs: [bankdemo_copylib]
+description: BankDemo developer sandbox; VSAM clusters only, no DB2.

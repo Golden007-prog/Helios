@@ -32,6 +32,9 @@ class PromoteRequest(BaseModel):
 
 class PromoteResponse(BaseModel):
     promote_event_id: str
+    audit_event_id: str  # Same value as ``promote_event_id``; matches the
+    # convention used by other state-changing endpoints (regions, scan,
+    # abend) so clients can read this field uniformly.
     diff: list[dict[str, Any]]
     confidence_score: int = Field(ge=0, le=100)
     confidence_breakdown: dict[str, int | float] = Field(default_factory=dict)

@@ -1,7 +1,9 @@
 # MeridianBank int2 — Maya's normal target before promoting to int3.
 # The 7 fields below (hlq, db2.subsystem_id, db2.plan_collection, racf_group,
 # jes.class, jes.sysout_class, scheduler_queue) are the substitution surface
-# Region Atlas drives in the int2 → int3 demo arc.
+# Region Atlas drives in the int2 → int3 demo arc. All other top-level
+# fields are aligned with int3.yaml so the diff returns exactly those 7
+# entries — see backend/tests/test_demo_smoke.py::test_step4...
 name: int2
 tier: integration
 hlq: CUST.INT2
@@ -17,9 +19,10 @@ jes:
   class: A
   sysout_class: X
 scheduler_queue: BATCH_DEV
-volser_pattern: INT2*
-gdg_retention: 5
-protected_resources: []
+volser_pattern: INT*
+gdg_retention: 30
+protected_resources:
+  - CUST.MASTER
 confidence_weight_overrides: {}
 review:
   auto_approve_threshold: 90
