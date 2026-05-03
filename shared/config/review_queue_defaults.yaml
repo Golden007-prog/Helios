@@ -1,0 +1,59 @@
+# Default Review Queue policy per region tier.
+# Loaded by backend/app/services/review_policy.py.
+#
+# Each rule is matched against the audit event's `type` field. The first
+# matching rule for the event's region tier wins. If no rule matches, the
+# default policy is REVIEW (safe default — auditor's friend).
+#
+# Tier resolution:
+#   * The region tier is derived from `subject.region` → helios_regions doc.
+#   * If no region (e.g., system events, auth), tier is "global".
+#
+# Rule shape:
+#   - type:       audit event type pattern (exact, or `*` glob)
+#   - decision:   "auto_approve" | "review" | "review_with_reason"
+#   - condition:  optional sub-conditions (e.g., min confidence_score)
+
+policies:
+
+  global:
+    - type: "auth.login"
+      decision: auto_approve
+    - type: "auth.login_failed"
+      decision: auto_approve
+    - type: "auth.logout"
+      decision: auto_approve
+
+  development:
+    - type: "region_profile_edit"
+      decision: auto_approve
+    - type: "promote_*"
+      decision: auto_approve
+    - type: "finding_*"
+      decision: auto_approve
+    - type: "score_override"
+      decision: review_with_reason
+    - type: "runbook_*"
+      decision: auto_approve
+
+  integration:
+    - type: "region_profile_edit"
+      decision: auto_approve
+    - type: "promote_*"
+      decision: auto_approve
+      condition:
+        confidence_score_gte: 90
+    - type: "promote_*"
+      decision: review
+    - type: "finding_*"
+      decision: auto_approve
+    - type: "score_override"
+      decision: review_with_reason
+    - type: "score_weights_edit"
+      decision: review
+    - type: "runbook_*"
+      decision: auto_approve
+
+  production:
+    - type: "*"
+      decision: review_with_reason

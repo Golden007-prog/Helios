@@ -1,0 +1,22 @@
+# MeridianBank dev3 — pre-integration smoke
+name: dev3
+tier: development
+hlq: CUST.DEV3
+db2:
+  subsystem_id: DBD3
+  plan_collection: CUSTPKG.DEV3
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: DEV3DEV
+jes:
+  class: A
+  sysout_class: X
+scheduler_queue: BATCH_DEV
+volser_pattern: DEV3*
+gdg_retention: 5
+protected_resources: []
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90

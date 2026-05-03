@@ -1,0 +1,63 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.apikey
+*.pem
+*.key
+credentials.json
+ibm_cloud_api_key*
+github_pat*
+watsonx_*.json
+
+# Silent Claude Code (Golden only) — not part of the submission
+.claude/
+.claude.json
+CLAUDE.md
+CLAUDE.md.local
+
+# Bob local state — shared MCP config IS committed (.bob/mcp.json)
+# but per-user state under .bob/ is not
+.bob/cache/
+.bob/state/
+.bob/*.log
+.bob/sessions/
+
+# Node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Build artefacts
+dist/
+build/
+*.tar.gz
+*.zip
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+logs/
+
+# Bob session report drafts (only committed exports go in bob_sessions/<owner>/)
+bob_sessions/drafts/
+bob_sessions/*.tmp

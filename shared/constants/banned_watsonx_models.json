@@ -1,0 +1,8 @@
+{
+  "$comment": "Banned watsonx models — single source of truth. Backend imports this list via app.config.BANNED_WATSONX_MODELS and asserts at every inference. Frontend never sends model ids, but uses this to render the model selector with these greyed out.",
+  "banned": [
+    "llama-3-405b-instruct",
+    "mistral-medium-2505",
+    "mistral-small-3-1-24b-instruct-2503"
+  ]
+}

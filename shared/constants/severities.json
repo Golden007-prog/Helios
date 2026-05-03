@@ -1,0 +1,10 @@
+{
+  "$comment": "Severity levels for findings. Order matters — sorted descending by impact.",
+  "severities": [
+    { "key": "critical", "label": "Critical", "default_deduction": 25 },
+    { "key": "high",     "label": "High",     "default_deduction": 10 },
+    { "key": "medium",   "label": "Medium",   "default_deduction":  5 },
+    { "key": "low",      "label": "Low",      "default_deduction":  2 },
+    { "key": "info",     "label": "Info",     "default_deduction":  0 }
+  ]
+}

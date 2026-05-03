@@ -1,0 +1,22 @@
+# MeridianBank dev1 — early development sandbox
+name: dev1
+tier: development
+hlq: CUST.DEV1
+db2:
+  subsystem_id: DBD1
+  plan_collection: CUSTPKG.DEV1
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: DEV1DEV
+jes:
+  class: A
+  sysout_class: X
+scheduler_queue: BATCH_DEV
+volser_pattern: DEV1*
+gdg_retention: 5
+protected_resources: []
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90

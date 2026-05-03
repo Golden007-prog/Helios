@@ -1,0 +1,47 @@
+# IBM Code Engine application spec.
+#
+# Apply with:
+#   ibmcloud ce app apply --file backend/deploy/code-engine.yaml
+#
+# Image is published by .github/workflows/backend-deploy.yml. Secrets are
+# expected to exist in the project as a single Secret named "helios-env" with
+# keys matching the env-from references below.
+apiVersion: codeengine.cloud.ibm.com/v1beta1
+kind: App
+metadata:
+  name: helios-backend
+  labels:
+    app: helios
+    component: backend
+spec:
+  image: icr.io/helios/helios-backend:${IMAGE_TAG:-latest}
+  imagePort: 8080
+  scaleMinInstances: 0
+  scaleMaxInstances: 4
+  scaleConcurrency: 80
+  scaleCpuLimit: 1
+  scaleMemoryLimit: 1G
+  scaleEphemeralStorageLimit: 512M
+  scaleRequestTimeoutSeconds: 60
+  runEnv:
+    - name: ENVIRONMENT
+      value: production
+    - name: LOG_FORMAT
+      value: json
+    - name: CORS_ORIGINS
+      value: "https://golden007-prog.github.io"
+  runEnvFromSecret:
+    - name: helios-env
+  probes:
+    liveness:
+      httpGet:
+        path: /healthz
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    readiness:
+      httpGet:
+        path: /readyz
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10

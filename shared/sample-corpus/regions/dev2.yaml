@@ -1,0 +1,22 @@
+# MeridianBank dev2 — feature development branch
+name: dev2
+tier: development
+hlq: CUST.DEV2
+db2:
+  subsystem_id: DBD2
+  plan_collection: CUSTPKG.DEV2
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: DEV2DEV
+jes:
+  class: A
+  sysout_class: X
+scheduler_queue: BATCH_DEV
+volser_pattern: DEV2*
+gdg_retention: 5
+protected_resources: []
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90

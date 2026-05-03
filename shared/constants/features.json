@@ -1,0 +1,40 @@
+{
+  "$comment": "Feature pillars per docs/AGENTS.md. The frontend uses these to generate nav + landing tiles; the backend uses them in audit-event types.",
+  "features": [
+    {
+      "key": "region_atlas",
+      "name": "Region Atlas",
+      "summary": "Versioned region profiles with semantic-aware diff.",
+      "icon": "globe",
+      "route": "/regions"
+    },
+    {
+      "key": "jjscan",
+      "name": "JJSCAN+",
+      "summary": "JCL static analysis with reason-tagged dispositions.",
+      "icon": "scan",
+      "route": "/jjscan"
+    },
+    {
+      "key": "abend",
+      "name": "ABEND Archaeologist",
+      "summary": "SYSLOG + source triangulation with confidence tiers.",
+      "icon": "bug",
+      "route": "/abend"
+    },
+    {
+      "key": "confidence_score",
+      "name": "Confidence Score",
+      "summary": "0–100 readiness gauge composed across the other three.",
+      "icon": "gauge",
+      "route": "/confidence"
+    },
+    {
+      "key": "review_queue",
+      "name": "Review Queue",
+      "summary": "Real-time team approval with mobile fallback.",
+      "icon": "inbox",
+      "route": "/review"
+    }
+  ]
+}

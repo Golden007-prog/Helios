@@ -1,0 +1,86 @@
+name: PR — lint + test
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (ruff + mypy + pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - name: Install deps
+        run: pip install -e "backend[dev]"
+      - name: Lint (ruff)
+        working-directory: backend
+        run: ruff check .
+      - name: Format check (ruff)
+        working-directory: backend
+        run: ruff format --check .
+      - name: Type check (mypy)
+        working-directory: backend
+        run: mypy app
+      - name: Tests (pytest)
+        working-directory: backend
+        run: pytest --cov=app --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage.xml
+
+  mcp-servers:
+    name: MCP servers (smoke tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install -e "mcp-servers[dev]"
+      - working-directory: mcp-servers
+        run: |
+          ruff check .
+          pytest
+
+  shared-codegen:
+    name: Shared — typegen up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20", cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: pip install -e "backend[dev]"
+      - run: cd frontend && npm ci || npm install
+      - name: Run typegen
+        run: |
+          python -m shared.codegen.dump_openapi
+          python -m shared.codegen.pydantic_to_typescript
+          python -m shared.codegen.dump_constants
+      - name: Fail if generated files changed
+        run: |
+          git diff --exit-code -- shared/schemas frontend/src/lib/api/types.gen.ts frontend/src/lib/api/constants.gen.ts \
+            || (echo "::error::generated files are stale — run \`make typegen\`" && exit 1)
+
+  frontend:
+    name: Frontend (typecheck + lint + vitest)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20", cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci || npm install
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test

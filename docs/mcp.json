@@ -1,0 +1,114 @@
+{
+  "$schema": "https://bob.ibm.com/schemas/mcp.v1.json",
+  "version": 1,
+  "comment": "Shared MCP server config. Per-developer credentials live in .env (gitignored). Custom Helios servers are disabled by default; enable as you build them. See docs/MCP_SETUP.md.",
+  "servers": {
+    "github": {
+      "enabled": true,
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "alwaysAllow": [
+        "search_repositories",
+        "search_issues",
+        "search_code",
+        "get_file_contents",
+        "list_commits",
+        "list_pull_requests",
+        "get_pull_request",
+        "list_issues",
+        "get_issue"
+      ]
+    },
+    "filesystem": {
+      "enabled": true,
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${PROJECT_ROOT}"
+      ],
+      "alwaysAllow": [
+        "read_file",
+        "list_directory",
+        "search_files",
+        "get_file_info"
+      ]
+    },
+    "memory": {
+      "enabled": true,
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "alwaysAllow": [
+        "search_nodes",
+        "read_graph",
+        "open_nodes"
+      ]
+    },
+    "fetch": {
+      "enabled": true,
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "alwaysAllow": [
+        "fetch"
+      ]
+    },
+    "ibm-cloud": {
+      "enabled": false,
+      "comment": "Custom Helios MCP. Enable when backend/mcp/ibm_cloud_server.py is built.",
+      "command": "python",
+      "args": ["-m", "backend.mcp.ibm_cloud_server"],
+      "env": {
+        "IBM_CLOUD_API_KEY": "${IBM_CLOUD_API_KEY}",
+        "IBM_CLOUD_REGION": "${IBM_CLOUD_REGION}"
+      },
+      "alwaysAllow": []
+    },
+    "cloudant": {
+      "enabled": false,
+      "comment": "Custom Helios MCP. Read-only Cloudant queries scoped to helios_* collections.",
+      "command": "python",
+      "args": ["-m", "backend.mcp.cloudant_server"],
+      "env": {
+        "CLOUDANT_URL": "${CLOUDANT_URL}",
+        "CLOUDANT_APIKEY": "${CLOUDANT_APIKEY}"
+      },
+      "alwaysAllow": [
+        "list_collections",
+        "find_documents",
+        "get_document"
+      ]
+    },
+    "watsonx": {
+      "enabled": false,
+      "comment": "Custom Helios MCP. Wraps Granite Code calls with shop-aware prompt templates.",
+      "command": "python",
+      "args": ["-m", "backend.mcp.watsonx_server"],
+      "env": {
+        "WATSONX_URL": "${WATSONX_URL}",
+        "WATSONX_PROJECT_ID": "${WATSONX_PROJECT_ID}",
+        "WATSONX_APIKEY": "${WATSONX_APIKEY}"
+      },
+      "alwaysAllow": []
+    },
+    "helios-corpus": {
+      "enabled": false,
+      "comment": "Custom Helios MCP. Read-only access to the MeridianBank synthetic corpus.",
+      "command": "python",
+      "args": ["-m", "backend.mcp.corpus_server"],
+      "env": {
+        "CORPUS_ROOT": "${PROJECT_ROOT}/shared/sample-corpus/MERIDIANBANK"
+      },
+      "alwaysAllow": [
+        "list_jcl",
+        "read_jcl",
+        "list_cobol",
+        "read_cobol",
+        "list_regions",
+        "get_region_profile"
+      ]
+    }
+  }
+}

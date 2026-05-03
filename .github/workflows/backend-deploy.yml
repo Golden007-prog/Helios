@@ -1,0 +1,65 @@
+name: Backend — deploy to Code Engine
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-deploy.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build + push container
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: echo "tag=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Login to IBM Container Registry
+        env:
+          IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+        run: |
+          curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+          ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r us-south
+          ibmcloud cr login
+      - name: Build image
+        run: |
+          docker build \
+            --build-arg HELIOS_GIT_SHA="${{ steps.meta.outputs.tag }}" \
+            --build-arg HELIOS_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --build-arg HELIOS_IMAGE_TAG="${{ steps.meta.outputs.tag }}" \
+            -t icr.io/helios/helios-backend:${{ steps.meta.outputs.tag }} \
+            backend
+      - run: docker push icr.io/helios/helios-backend:${{ steps.meta.outputs.tag }}
+
+  deploy:
+    name: Apply Code Engine spec (manual approval)
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: ${{ steps.app-url.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login + select project
+        env:
+          IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+        run: |
+          curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+          ibmcloud plugin install code-engine -f
+          ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r us-south
+          ibmcloud ce project select --name helios-prod
+      - name: Apply app spec
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+        run: |
+          envsubst < backend/deploy/code-engine.yaml | ibmcloud ce app apply --file -
+      - name: Print URL
+        id: app-url
+        run: echo "url=$(ibmcloud ce app get -n helios-backend -o url)" >> "$GITHUB_OUTPUT"

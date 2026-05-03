@@ -1,0 +1,8 @@
+{
+  "$comment": "Status values used in jobs, queue, and finding dispositions.",
+  "job_states":      ["pending", "running", "succeeded", "failed", "cancelled"],
+  "queue_states":    ["pending_review", "approved", "rejected", "auto_approved", "expired"],
+  "finding_decisions": ["pending", "accept", "dismiss", "auto_fixed"],
+  "abend_tiers":     ["confirmed", "probable", "unfamiliar", "unknown"],
+  "region_tiers":    ["sandbox", "development", "integration", "production"]
+}

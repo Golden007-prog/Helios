@@ -1,0 +1,29 @@
+# MeridianBank int3 — release-validation tier.
+# 7 fields differ from int2 (the substitution surface): hlq, db2.subsystem_id,
+# db2.plan_collection, racf_group, jes.class, jes.sysout_class, scheduler_queue.
+# protected_resources also adds CUST.MASTER (drives the backup-gap finding in
+# Scene 1 of docs/PERSONA_MAYA.md) and confidence weights tighten by 1.5×.
+name: int3
+tier: integration
+hlq: CUST.INT3
+db2:
+  subsystem_id: DBI3
+  plan_collection: CUSTPKG.INT3
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: INT3DEV
+jes:
+  class: P
+  sysout_class: S
+scheduler_queue: BATCH_INT
+volser_pattern: INT3*
+gdg_retention: 30
+protected_resources:
+  - CUST.MASTER
+confidence_weight_overrides:
+  critical: 37
+  high: 15
+review:
+  auto_approve_threshold: 90

@@ -1,0 +1,28 @@
+# MeridianBank prod — strictest weights, broadest protected-resources list.
+name: prod
+tier: production
+hlq: CUST.PROD
+db2:
+  subsystem_id: DBP1
+  plan_collection: CUSTPKG.PROD
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: PRODOPS
+jes:
+  class: S
+  sysout_class: S
+scheduler_queue: BATCH_PROD
+volser_pattern: PROD*
+gdg_retention: 90
+protected_resources:
+  - CUST.MASTER
+  - ACCT.MASTER
+  - TRAN.HISTORY
+confidence_weight_overrides:
+  critical: 50
+  high: 25
+  backup_gap: 60
+review:
+  auto_approve_threshold: 100

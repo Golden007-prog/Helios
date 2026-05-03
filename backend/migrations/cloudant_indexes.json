@@ -1,0 +1,197 @@
+{
+  "comment": "Mango indexes for the Helios Cloudant collections. Applied by apply_indexes.py. Each entry is { db: <short>, index: <Cloudant create-index payload> }. Field selection follows the queries actually issued by app/services/* and app/api/* (audit code uses ts_unix_ms, not created_at).",
+  "indexes": [
+    {
+      "db": "regions",
+      "index": {
+        "name": "by-shop-kind-name",
+        "type": "json",
+        "index": { "fields": ["shop", "kind", "name"] }
+      }
+    },
+    {
+      "db": "regions",
+      "index": {
+        "name": "by-shop-kind-tier",
+        "type": "json",
+        "index": { "fields": ["shop", "kind", "tier"] }
+      }
+    },
+    {
+      "db": "jcl_artifacts",
+      "index": {
+        "name": "by-shop-kind-region-name",
+        "type": "json",
+        "index": { "fields": ["shop", "kind", "region", "name"] }
+      }
+    },
+    {
+      "db": "jcl_artifacts",
+      "index": {
+        "name": "by-shop-kind-region-score",
+        "type": "json",
+        "index": { "fields": ["shop", "kind", "region", "current_confidence_score"] }
+      }
+    },
+    {
+      "db": "findings",
+      "index": {
+        "name": "by-shop-region-state-severity",
+        "type": "json",
+        "index": { "fields": ["shop", "subject.region", "state", "severity"] }
+      }
+    },
+    {
+      "db": "findings",
+      "index": {
+        "name": "by-shop-rule-state",
+        "type": "json",
+        "index": { "fields": ["shop", "rule_id", "state"] }
+      }
+    },
+    {
+      "db": "findings",
+      "index": {
+        "name": "by-shop-jcl-region-time",
+        "type": "json",
+        "index": { "fields": ["shop", "subject.name", "subject.region", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "audit_log",
+      "index": {
+        "name": "by-shop-kind-time",
+        "type": "json",
+        "index": { "fields": ["shop", "kind", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "audit_log",
+      "index": {
+        "name": "by-shop-actor-time",
+        "type": "json",
+        "index": { "fields": ["shop", "actor", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "audit_log",
+      "index": {
+        "name": "by-shop-type-time",
+        "type": "json",
+        "index": { "fields": ["shop", "type", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "audit_log",
+      "index": {
+        "name": "by-shop-subject-time",
+        "type": "json",
+        "index": { "fields": ["shop", "subject.kind", "subject.name", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "audit_log",
+      "index": {
+        "name": "by-shop-prev-hash",
+        "type": "json",
+        "index": { "fields": ["shop", "kind", "chain.prev_event_hash"] }
+      }
+    },
+    {
+      "db": "abend_events",
+      "index": {
+        "name": "by-shop-program-time",
+        "type": "json",
+        "index": { "fields": ["shop", "program", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "abend_events",
+      "index": {
+        "name": "by-shop-code-time",
+        "type": "json",
+        "index": { "fields": ["shop", "abend_code", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "abend_patterns",
+      "index": {
+        "name": "by-shop-code-tier",
+        "type": "json",
+        "index": { "fields": ["shop", "abend_code", "tier"] }
+      }
+    },
+    {
+      "db": "runbooks",
+      "index": {
+        "name": "by-shop-applies-code-program",
+        "type": "json",
+        "index": { "fields": ["shop", "applies_to.abend_code", "applies_to.program"] }
+      }
+    },
+    {
+      "db": "runbooks",
+      "index": {
+        "name": "by-shop-success",
+        "type": "json",
+        "index": { "fields": ["shop", "success_count"] }
+      }
+    },
+    {
+      "db": "queue",
+      "index": {
+        "name": "by-shop-state-time",
+        "type": "json",
+        "index": { "fields": ["shop", "state", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "learning",
+      "index": {
+        "name": "by-shop-rule-decision-time",
+        "type": "json",
+        "index": { "fields": ["shop", "rule_id", "decision", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "learning",
+      "index": {
+        "name": "by-shop-type-time",
+        "type": "json",
+        "index": { "fields": ["shop", "type", "ts_unix_ms"] }
+      }
+    },
+    {
+      "db": "users",
+      "index": {
+        "name": "by-shop-kind-email",
+        "type": "json",
+        "index": { "fields": ["shop", "kind", "email"] }
+      }
+    },
+    {
+      "db": "sessions",
+      "index": {
+        "name": "by-shop-user",
+        "type": "json",
+        "index": { "fields": ["shop", "user_id"] }
+      }
+    },
+    {
+      "db": "sessions",
+      "index": {
+        "name": "by-shop-expires",
+        "type": "json",
+        "index": { "fields": ["shop", "expires_at"] }
+      }
+    },
+    {
+      "db": "jjscan_jobs",
+      "index": {
+        "name": "by-shop-state-time",
+        "type": "json",
+        "index": { "fields": ["shop", "state", "ts_unix_ms"] }
+      }
+    }
+  ]
+}

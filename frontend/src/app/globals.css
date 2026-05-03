@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* IBM Carbon-adjacent design tokens. Light + dark via [data-theme]. */
+:root,
+[data-theme="light"] {
+  --bg: 246 247 248;
+  --bg-subtle: 234 236 239;
+  --bg-elev: 255 255 255;
+  --fg: 22 26 34;
+  --fg-muted: 95 102 113;
+  --fg-inverse: 255 255 255;
+  --border: 217 220 226;
+  --accent: 15 98 254; /* IBM blue 60 */
+  --accent-fg: 255 255 255;
+  --success: 36 161 72;
+  --warning: 241 194 27;
+  --danger: 218 30 40;
+}
+
+[data-theme="dark"] {
+  --bg: 22 22 22;
+  --bg-subtle: 38 38 38;
+  --bg-elev: 38 38 38;
+  --fg: 244 244 244;
+  --fg-muted: 168 168 168;
+  --fg-inverse: 22 22 22;
+  --border: 56 56 56;
+  --accent: 78 154 241;
+  --accent-fg: 22 22 22;
+  --success: 66 184 90;
+  --warning: 244 200 80;
+  --danger: 250 79 89;
+}
+
+html,
+body {
+  @apply bg-bg text-fg;
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* Print stylesheet — used when judges export a hero shot or audit summary. */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+  nav,
+  aside,
+  [data-print-hidden="true"] {
+    display: none !important;
+  }
+  .print-page {
+    page-break-after: always;
+  }
+}

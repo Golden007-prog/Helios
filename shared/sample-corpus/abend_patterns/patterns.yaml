@@ -1,0 +1,229 @@
+# 15 ABEND patterns from docs/ABEND_PATTERN_LIBRARY.md.
+# Loaded into helios_abend_patterns by backend/migrations/seed_demo.py.
+# Each pattern has matching example dump under abend_examples/<example_file>.
+
+patterns:
+  # --- COBOL runtime (5) -----------------------------------------------------
+  - code: S0C7
+    class: data_exception
+    tier: confirmed
+    language_scope: [cobol]
+    regex_signatures: ["S0C7", "DATA EXCEPTION", "ABEND CODE 0C7"]
+    typical_causes:
+      - "Numeric op on non-numeric data"
+      - "Uninitialized COMP-3 field"
+      - "DISPLAY value used where numeric expected"
+    investigation_steps:
+      - "Identify failing instruction address"
+      - "Map to source line via compile listing or ProLeap parser"
+      - "Walk MOVE chains backward"
+    common_fixes:
+      - "Add INITIALIZE before first use of numeric field"
+      - "Add NUMERIC test before arithmetic"
+    example_file: s0c7_custproc.txt
+
+  - code: S0C4
+    class: protection_exception
+    tier: confirmed
+    language_scope: [cobol]
+    regex_signatures: ["S0C4", "PROTECTION EXCEPTION", "ABEND CODE 0C4"]
+    typical_causes:
+      - "Subscript out of range on OCCURS table"
+      - "REDEFINES mismatch"
+      - "Lost addressability on passed parameter"
+    investigation_steps:
+      - "Check OCCURS bounds in failing paragraph"
+      - "Verify USING/CALL parameter chain"
+    common_fixes:
+      - "Add subscript bounds check"
+      - "Initialize linkage section before USING"
+    example_file: s0c4_acctclose.txt
+
+  - code: S322
+    class: time_exceeded
+    tier: confirmed
+    language_scope: [cobol, jcl]
+    regex_signatures: ["S322", "TIME EXCEEDED", "JOB TIME LIMIT"]
+    typical_causes:
+      - "Runaway loop"
+      - "Unindexed table grew 10x"
+      - "Infinite EVALUATE fallthrough"
+    investigation_steps:
+      - "Check TIME= parameter on JOB / EXEC"
+      - "Profile loops in failing paragraph"
+    common_fixes:
+      - "Bump TIME= or fix the loop"
+      - "Add index to growing DB2 table"
+    example_file: s322_eod_report.txt
+
+  - code: U4038
+    class: le_user_abend
+    tier: probable
+    language_scope: [cobol]
+    regex_signatures: ["U4038", "USER COMPLETION CODE 4038", "LE/370"]
+    typical_causes:
+      - "Unhandled COBOL exception"
+      - "Often wraps S0C7 inside"
+    investigation_steps:
+      - "Check CEEDUMP for inner exception"
+    common_fixes:
+      - "Address the inner exception"
+    example_file: u4038_custproc.txt
+
+  - code: IGZ0035S
+    class: cobol_paragraph_not_found
+    tier: confirmed
+    language_scope: [cobol]
+    regex_signatures: ["IGZ0035S", "PARAGRAPH NOT FOUND", "DYNAMIC CALL"]
+    typical_causes:
+      - "PERFORM target misspelled"
+      - "Dynamic CALL of removed paragraph"
+    investigation_steps:
+      - "Grep for PERFORM target name"
+      - "Check link-edit map"
+    common_fixes:
+      - "Restore or rename the paragraph"
+    example_file: igz0035s_tranpost.txt
+
+  # --- JCL / allocation (5) --------------------------------------------------
+  - code: S806
+    class: program_not_found
+    tier: confirmed
+    language_scope: [jcl]
+    regex_signatures: ["S806", "PROGRAM NOT FOUND", "MODULE NOT IN STEPLIB"]
+    typical_causes:
+      - "Missing STEPLIB / JOBLIB"
+      - "Wrong program name"
+      - "Link-edit failure"
+    investigation_steps:
+      - "Verify STEPLIB DSN is bound to target region"
+    common_fixes:
+      - "Update STEPLIB to current region's LOAD library"
+    example_file: s806_eod_report.txt
+
+  - code: S813
+    class: wrong_volume
+    tier: probable
+    language_scope: [jcl]
+    regex_signatures: ["S813", "WRONG VOLUME", "VOLUME NOT MOUNTED"]
+    typical_causes:
+      - "Tape mount mismatch"
+      - "Dataset not cataloged"
+    investigation_steps:
+      - "Verify dataset is cataloged in target region"
+    common_fixes:
+      - "DEFINE the dataset in the region's catalog"
+    example_file: s813_acctopen.txt
+
+  - code: IEC141I
+    class: io_error_member_not_found
+    tier: confirmed
+    language_scope: [jcl]
+    regex_signatures: ["IEC141I", "013-18", "MEMBER NOT FOUND"]
+    typical_causes:
+      - "PROC member missing in target PROCLIB"
+      - "Promotion forgot to add member"
+    investigation_steps:
+      - "List PROCLIB; check for member"
+    common_fixes:
+      - "Copy member to target PROCLIB"
+    example_file: iec141i_proclib.txt
+
+  - code: IEF272I
+    class: step_not_executed
+    tier: probable
+    language_scope: [jcl]
+    regex_signatures: ["IEF272I", "STEP NOT EXECUTED", "ALLOCATION FAILURE"]
+    typical_causes:
+      - "Volume full"
+      - "Dataset name conflict"
+      - "RACF authority denied"
+    investigation_steps:
+      - "Look for preceding IEF233I or IGD17xxx"
+    common_fixes:
+      - "Fix dataset allocation parms"
+    example_file: ief272i_alloc_fail.txt
+
+  - code: IEC031I
+    class: out_of_space
+    tier: probable
+    language_scope: [jcl]
+    regex_signatures: ["IEC031I", "D37", "OUT OF SPACE", "EXTENT EXHAUSTED"]
+    typical_causes:
+      - "Primary + secondary extents exhausted"
+    investigation_steps:
+      - "Check SPACE= and growth pattern"
+    common_fixes:
+      - "Bump SPACE= secondary; or compress dataset"
+    example_file: iec031i_d37.txt
+
+  - code: IEC150I
+    class: open_failed
+    tier: probable
+    language_scope: [jcl]
+    regex_signatures: ["IEC150I", "OPEN FAILED", "CATALOG MISMATCH"]
+    typical_causes:
+      - "Catalog mismatch"
+      - "GDG model missing"
+      - "DD parameter conflict"
+    investigation_steps:
+      - "Check dataset state (catalog, GDG model)"
+    common_fixes:
+      - "Recatalog or re-create GDG model"
+    example_file: iec150i_open_fail.txt
+
+  # --- DB2 (4) ---------------------------------------------------------------
+  - code: SQLCODE-805
+    class: plan_not_bound
+    tier: confirmed
+    language_scope: [db2]
+    regex_signatures: ["SQLCODE -805", "DBRM OR PACKAGE NAME", "NOT FOUND"]
+    typical_causes:
+      - "Plan/package missing in target subsystem's collection"
+    investigation_steps:
+      - "BIND PACKAGE in the target collection"
+    common_fixes:
+      - "Run BIND in target region"
+    example_file: sqlcode_805_int2_bind.txt
+
+  - code: SQLCODE-811
+    class: multi_row_result
+    tier: confirmed
+    language_scope: [db2]
+    regex_signatures: ["SQLCODE -811", "MULTIPLE ROWS"]
+    typical_causes:
+      - "SELECT INTO returned > 1 row without cursor"
+    investigation_steps:
+      - "Tighten predicate or use a cursor"
+    common_fixes:
+      - "Add cursor + LIMIT semantics"
+    example_file: sqlcode_811_dupcust.txt
+
+  - code: SQLCODE-904
+    class: resource_unavailable
+    tier: probable
+    language_scope: [db2]
+    regex_signatures: ["SQLCODE -904", "RESOURCE UNAVAILABLE"]
+    typical_causes:
+      - "Tablespace stopped"
+      - "Lock contention"
+      - "Utility running"
+    investigation_steps:
+      - "DISPLAY DATABASE / LOCKS"
+    common_fixes:
+      - "Retry after utility window"
+    example_file: sqlcode_904_lockwait.txt
+
+  - code: SQLCODE-922
+    class: authorization_failure
+    tier: confirmed
+    language_scope: [db2]
+    regex_signatures: ["SQLCODE -922", "AUTHORIZATION FAILURE"]
+    typical_causes:
+      - "RACF/DB2 GRANT mismatch"
+      - "Region's RACF user lacks GRANT"
+    investigation_steps:
+      - "DSN GRANT listing for target user"
+    common_fixes:
+      - "GRANT EXECUTE on PLAN to RACF group"
+    example_file: sqlcode_922_grant.txt

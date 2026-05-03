@@ -1,0 +1,25 @@
+# MeridianBank int2 — Maya's normal target before promoting to int3.
+# The 7 fields below (hlq, db2.subsystem_id, db2.plan_collection, racf_group,
+# jes.class, jes.sysout_class, scheduler_queue) are the substitution surface
+# Region Atlas drives in the int2 → int3 demo arc.
+name: int2
+tier: integration
+hlq: CUST.INT2
+db2:
+  subsystem_id: DBI2
+  plan_collection: CUSTPKG.INT2
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: INT2DEV
+jes:
+  class: A
+  sysout_class: X
+scheduler_queue: BATCH_DEV
+volser_pattern: INT2*
+gdg_retention: 5
+protected_resources: []
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90

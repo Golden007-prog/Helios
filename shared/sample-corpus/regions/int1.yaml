@@ -1,0 +1,22 @@
+# MeridianBank int1 — first integration tier
+name: int1
+tier: integration
+hlq: CUST.INT1
+db2:
+  subsystem_id: DBI1
+  plan_collection: CUSTPKG.INT1
+  default_bind:
+    isolation: CS
+    acquire: USE
+    release: COMMIT
+racf_group: INT1DEV
+jes:
+  class: A
+  sysout_class: X
+scheduler_queue: BATCH_DEV
+volser_pattern: INT1*
+gdg_retention: 5
+protected_resources: []
+confidence_weight_overrides: {}
+review:
+  auto_approve_threshold: 90
