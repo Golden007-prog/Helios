@@ -1,0 +1,15 @@
+# Generated files — owned by `make typegen`. Prettier reformats break the
+# typegen-up-to-date CI check because the typegen emits quoted object keys
+# and prettier strips them.
+src/lib/api/types.gen.ts
+src/lib/api/constants.gen.ts
+shared/schemas/
+
+# Build output / package metadata
+.next/
+out/
+node_modules/
+package-lock.json
+
+# Storybook builds
+storybook-static/
