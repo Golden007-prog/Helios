@@ -19,8 +19,7 @@ export default function ConfidencePage() {
 
   const score = useQuery({
     queryKey: queryKeys.score.compute(HERO_JCL, HERO_REGION),
-    queryFn: () =>
-      computeScore({ jcl_name: HERO_JCL, region: HERO_REGION }),
+    queryFn: () => computeScore({ jcl_name: HERO_JCL, region: HERO_REGION }),
   });
 
   const applyFix = useMutation({
@@ -40,17 +39,10 @@ export default function ConfidencePage() {
 
   // Filter the deductions client-side based on which fixes the user
   // has already applied — keeps the gauge honest about what's left.
-  const breakdown = score.data?.breakdown
-    ? toGaugeBreakdown(score.data.breakdown)
-    : null;
-  const remainingDeductions =
-    breakdown?.deductions.filter((d) => !appliedFixes.has(d.key)) ?? [];
-  const remainingPenalty = remainingDeductions.reduce(
-    (sum, d) => sum + d.amount,
-    0,
-  );
-  const totalBoost =
-    breakdown?.boosts.reduce((sum, b) => sum + b.amount, 0) ?? 0;
+  const breakdown = score.data?.breakdown ? toGaugeBreakdown(score.data.breakdown) : null;
+  const remainingDeductions = breakdown?.deductions.filter((d) => !appliedFixes.has(d.key)) ?? [];
+  const remainingPenalty = remainingDeductions.reduce((sum, d) => sum + d.amount, 0);
+  const totalBoost = breakdown?.boosts.reduce((sum, b) => sum + b.amount, 0) ?? 0;
   const liveScore = score.data
     ? Math.max(0, Math.min(100, (score.data.breakdown.base ?? 100) - remainingPenalty + totalBoost))
     : 0;
@@ -69,7 +61,9 @@ export default function ConfidencePage() {
           <ul className="list-disc space-y-1 pl-5 text-sm">
             <li>Severity-weighted JJSCAN+ deductions (per-region overridable).</li>
             <li>Region mismatch count (HLQ, DB2, RACF, JES, scheduler, volser, GDG retention).</li>
-            <li>Backup-gap signal: protected resources without a paired UNLOAD/IMAGE COPY/REPRO.</li>
+            <li>
+              Backup-gap signal: protected resources without a paired UNLOAD/IMAGE COPY/REPRO.
+            </li>
             <li>Historical ABEND priors for the program in the target region.</li>
           </ul>
         </CardContent>

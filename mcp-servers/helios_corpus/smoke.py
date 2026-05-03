@@ -82,7 +82,9 @@ async def _run() -> int:
 def _trim(value: Any) -> Any:
     """Truncate large values so the smoke output stays readable."""
     if isinstance(value, dict):
-        return {k: _trim(v) for k, v in value.items() if k not in {"raw_text", "parsed", "dump_text"}}
+        return {
+            k: _trim(v) for k, v in value.items() if k not in {"raw_text", "parsed", "dump_text"}
+        }
     if isinstance(value, list):
         return [_trim(v) for v in value[:5]]
     if isinstance(value, str) and len(value) > 200:

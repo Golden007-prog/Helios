@@ -6,7 +6,7 @@ resolve handler is real plumbing on top of audit + learning events.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends
 
@@ -79,8 +79,7 @@ async def analyze_abend(
     if (
         watsonx.is_live
         and not result.degraded
-        and result.identified_abend.tier
-        in (AbendTier.CONFIRMED, AbendTier.PROBABLE)
+        and result.identified_abend.tier in (AbendTier.CONFIRMED, AbendTier.PROBABLE)
     ):
         try:
             prompt = _build_summary_prompt(result, body.raw_text)
@@ -135,7 +134,7 @@ async def resolve_abend(
         },
         extra={"notes": body.notes},
     )
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     learning_doc = {
         "kind": "learning_event",
         "schema_version": "1.0",

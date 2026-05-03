@@ -139,8 +139,7 @@ def parse_pli(
 
 
 def _enumerate_lines(text: str):
-    for i, line in enumerate(text.splitlines(), start=1):
-        yield i, line
+    yield from enumerate(text.splitlines(), start=1)
 
 
 def parse_pli_file(path: Path | str, gap_logger: GapLogger | None = None) -> PliArtifact:

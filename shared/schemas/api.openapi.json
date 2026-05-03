@@ -2384,6 +2384,10 @@
       },
       "PromoteResponse": {
         "properties": {
+          "audit_event_id": {
+            "title": "Audit Event Id",
+            "type": "string"
+          },
           "auto_fixes_applied": {
             "items": {
               "$ref": "#/components/schemas/AutoFix"
@@ -2447,6 +2451,7 @@
         },
         "required": [
           "promote_event_id",
+          "audit_event_id",
           "diff",
           "confidence_score",
           "auto_fixes_applied",
@@ -4862,6 +4867,7 @@
     },
     "/api/promote": {
       "post": {
+        "description": "Execute the full promote pipeline.",
         "operationId": "promote_api_promote_post",
         "parameters": [
           {

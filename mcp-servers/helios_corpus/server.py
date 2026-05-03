@@ -17,7 +17,6 @@ Tools exposed:
 
 from __future__ import annotations
 
-import asyncio
 import os
 import sys
 from pathlib import Path
@@ -29,7 +28,7 @@ _BACKEND = _REPO_ROOT / "backend"
 if str(_BACKEND) not in sys.path:
     sys.path.insert(0, str(_BACKEND))
 
-from _shared import ToolError, ToolRegistry, run_cli
+from _shared import ToolError, ToolRegistry, run_cli  # noqa: E402  (sys.path mutation above must run first)
 
 DEMO_SHOP = os.environ.get("HELIOS_DEMO_SHOP", "meridianbank.demo")
 
@@ -224,7 +223,9 @@ async def _search(query: str, kind: str | None = None, limit: int = 20) -> dict[
     return {"hits": hits[:limit], "total": len(hits[:limit])}
 
 
-async def _diff_schema(table: str, dialect_a: str = "db2", dialect_b: str = "xdb") -> dict[str, Any]:
+async def _diff_schema(
+    table: str, dialect_a: str = "db2", dialect_b: str = "xdb"
+) -> dict[str, Any]:
     if not table:
         raise ToolError("'table' is required", code="INVALID_ARGUMENT")
     cl = await _get_cloudant()
@@ -267,9 +268,7 @@ async def _diff_schema(table: str, dialect_a: str = "db2", dialect_b: str = "xdb
 
 async def _scenarios() -> dict[str, Any]:
     cl = await _get_cloudant()
-    res = await cl.find(
-        "demo_scenarios", {"shop": DEMO_SHOP, "kind": "demo_scenario"}, limit=100
-    )
+    res = await cl.find("demo_scenarios", {"shop": DEMO_SHOP, "kind": "demo_scenario"}, limit=100)
     docs = sorted(res.get("docs", []), key=lambda d: d.get("scenario_id", ""))
     return {
         "scenarios": [

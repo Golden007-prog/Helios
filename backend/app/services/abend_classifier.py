@@ -24,9 +24,10 @@ For unit tests and offline operation we fall back to the YAML bundle that
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import yaml
 
@@ -39,7 +40,6 @@ from app.models.abend import (
     RankedRootCause,
     SourceTrace,
 )
-
 
 # ---------------------------------------------------------------------------
 # Inputs
@@ -62,6 +62,7 @@ TIER_UNFAMILIAR = 0.2
 # ---------------------------------------------------------------------------
 # Pattern bundle loader
 # ---------------------------------------------------------------------------
+
 
 def _resolve_patterns_file() -> Path | None:
     """Find ``patterns.yaml`` under either the container layout
@@ -240,9 +241,7 @@ def _empty_unknown(reason: str) -> AbendResponse:
         ),
         failing_step=FailingStep(),
         source_trace=SourceTrace(),
-        business_rule_explanation=(
-            "No ABEND pattern matched the supplied dump."
-        ),
+        business_rule_explanation=("No ABEND pattern matched the supplied dump."),
         ranked_root_causes=[],
         matching_runbooks=[],
         degraded=True,
@@ -260,9 +259,7 @@ def _empty_unknown(reason: str) -> AbendResponse:
 # ---------------------------------------------------------------------------
 
 
-def _rank_patterns(
-    raw: str, pool: list[dict[str, Any]]
-) -> list[tuple[dict[str, Any], float]]:
+def _rank_patterns(raw: str, pool: list[dict[str, Any]]) -> list[tuple[dict[str, Any], float]]:
     """Score every pattern in ``pool`` and return them sorted by score
     descending. Score is in [0, 1]."""
     if not pool:
@@ -282,9 +279,7 @@ def _rank_patterns(
     return scored
 
 
-def _score_pattern(
-    upper_text: str, signatures: list[str], total_lines: int
-) -> float:
+def _score_pattern(upper_text: str, signatures: list[str], total_lines: int) -> float:
     """Composite score:
 
     coverage = matched_signatures / total_signatures
@@ -354,9 +349,7 @@ def _extract_top_code(raw: str) -> str | None:
     return None
 
 
-_LOOSE_ABEND_RE = re.compile(
-    r"\bABEND\s*[=:]?\s*([A-Z0-9]{2,8})", re.IGNORECASE
-)
+_LOOSE_ABEND_RE = re.compile(r"\bABEND\s*[=:]?\s*([A-Z0-9]{2,8})", re.IGNORECASE)
 
 
 def _extract_loose_abend_token(raw: str) -> str | None:
@@ -409,12 +402,9 @@ def _extract_failing_step(raw: str) -> FailingStep:
 
 
 def _extract_source_trace(raw: str) -> SourceTrace:
-    paragraph_match = re.search(
-        r"PARAGRAPH[:\s]+([A-Z0-9$#@_-]+)", raw, re.IGNORECASE
-    )
+    paragraph_match = re.search(r"PARAGRAPH[:\s]+([A-Z0-9$#@_-]+)", raw, re.IGNORECASE)
     field_match = re.search(
-        r"(?:FAILING\s+FIELD|HIGHLIGHTED\s+FIELD|failing\s+field)[:\s]+"
-        r"([A-Z][A-Z0-9$#@_-]+)",
+        r"(?:FAILING\s+FIELD|HIGHLIGHTED\s+FIELD|failing\s+field)[:\s]+" r"([A-Z][A-Z0-9$#@_-]+)",
         raw,
         re.IGNORECASE,
     )
@@ -435,9 +425,7 @@ def _extract_source_trace(raw: str) -> SourceTrace:
 # ---------------------------------------------------------------------------
 
 
-def _ranked_root_causes(
-    causes: list[str], top_confidence: float
-) -> list[RankedRootCause]:
+def _ranked_root_causes(causes: list[str], top_confidence: float) -> list[RankedRootCause]:
     """Distribute the top-pattern confidence across its typical causes,
     decaying with index. Prior counts are placeholders until learning
     events are wired in. The first cause carries the full top confidence;
@@ -497,7 +485,4 @@ def _default_summarize(matched: dict[str, Any], _raw: str) -> str:
     leading = causes[0]
     if len(causes) == 1:
         return f"{code}: {leading}."
-    return (
-        f"{code}: most likely cause is {leading}. "
-        f"Other priors: {'; '.join(causes[1:3])}."
-    )
+    return f"{code}: most likely cause is {leading}. " f"Other priors: {'; '.join(causes[1:3])}."

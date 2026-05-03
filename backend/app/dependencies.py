@@ -22,6 +22,7 @@ from app.services.watsonx import WatsonxClient
 
 # --- Long-lived singletons ----------------------------------------------------
 
+
 @lru_cache(maxsize=1)
 def _cloudant_singleton() -> CloudantClient:
     return CloudantClient(get_settings())
@@ -46,6 +47,7 @@ def reset_dependency_cache() -> None:
 
 # --- Provider functions (FastAPI Depends targets) -----------------------------
 
+
 def get_settings_dep() -> Settings:
     return get_settings()
 
@@ -67,6 +69,7 @@ def get_job_runner_dep() -> JobRunner:
 
 
 # --- Auth ---------------------------------------------------------------------
+
 
 def get_current_user(
     authorization: Annotated[str | None, Header(alias="Authorization")] = None,

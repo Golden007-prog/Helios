@@ -62,8 +62,7 @@ export default function ReviewPage() {
     onError: (e) => toast.error("Approve failed", (e as Error).message),
   });
   const reject = useMutation({
-    mutationFn: (item: QueueItem) =>
-      rejectQueueItem(item.event_id, "Rejected via review queue"),
+    mutationFn: (item: QueueItem) => rejectQueueItem(item.event_id, "Rejected via review queue"),
     onSuccess: (_data, item) => {
       toast.success("Rejected", `${item.payload.jcl ?? item.type}`);
       queryClient.invalidateQueries({ queryKey: queryKeys.queue.list() });
@@ -94,11 +93,7 @@ export default function ReviewPage() {
       {queue.isLoading && <Skeleton className="h-32" />}
 
       {!queue.isLoading && queue.items.length === 0 && (
-        <EmptyState
-          Icon={Inbox}
-          title="Queue is empty"
-          description="Nothing pending review."
-        />
+        <EmptyState Icon={Inbox} title="Queue is empty" description="Nothing pending review." />
       )}
 
       {queue.items.length > 0 && (
@@ -108,11 +103,7 @@ export default function ReviewPage() {
           className="grid grid-cols-1 gap-4 pb-24 lg:grid-cols-[minmax(280px,1fr)_minmax(320px,2fr)] lg:pb-0"
           data-testid="queue-layout"
         >
-          <ul
-            role="list"
-            className="space-y-3"
-            data-testid="queue-list"
-          >
+          <ul role="list" className="space-y-3" data-testid="queue-list">
             {queue.items.map((item) => (
               <li key={item.event_id}>
                 <QueueCard
@@ -134,11 +125,7 @@ export default function ReviewPage() {
             ))}
           </ul>
 
-          <aside
-            className="hidden lg:block"
-            data-testid="queue-detail-pane"
-            aria-live="polite"
-          >
+          <aside className="hidden lg:block" data-testid="queue-detail-pane" aria-live="polite">
             {selected ? (
               <Card>
                 <CardContent className="space-y-3 py-4">

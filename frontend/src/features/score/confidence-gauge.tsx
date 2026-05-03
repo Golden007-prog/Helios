@@ -141,9 +141,7 @@ export function ConfidenceGauge({
   const color = colorFor(score);
   const animated = useAnimatedNumber(score);
 
-  const top3 = [...deductions]
-    .sort((a, b) => b.amount - a.amount)
-    .slice(0, 3);
+  const top3 = [...deductions].sort((a, b) => b.amount - a.amount).slice(0, 3);
 
   // SVG arc: 270° sweep starting at -135°, ending at +135° (six o'clock open).
   const radius = 80;
@@ -180,8 +178,7 @@ export function ConfidenceGauge({
             strokeWidth={stroke}
             strokeLinecap="round"
             style={{
-              transition:
-                "stroke 600ms cubic-bezier(0.22, 1, 0.36, 1), d 600ms",
+              transition: "stroke 600ms cubic-bezier(0.22, 1, 0.36, 1), d 600ms",
             }}
           />
           <text
@@ -293,27 +290,9 @@ function polar(cx: number, cy: number, r: number, angleDeg: number) {
   };
 }
 
-function describeArc(
-  cx: number,
-  cy: number,
-  r: number,
-  startAngle: number,
-  endAngle: number,
-) {
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
   const start = polar(cx, cy, r, endAngle);
   const end = polar(cx, cy, r, startAngle);
   const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
-  return [
-    "M",
-    start.x,
-    start.y,
-    "A",
-    r,
-    r,
-    0,
-    largeArc,
-    0,
-    end.x,
-    end.y,
-  ].join(" ");
+  return ["M", start.x, start.y, "A", r, r, 0, largeArc, 0, end.x, end.y].join(" ");
 }

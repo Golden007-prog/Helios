@@ -25,7 +25,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 from collections.abc import Mapping
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import ulid
@@ -113,10 +113,8 @@ class AuditWriter:
         """
         await self._ensure()
         async with self._lock:
-            now = datetime.now(timezone.utc)
-            event_id = (
-                f"evt:{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z:{type}:{ulid.new().str}"
-            )
+            now = datetime.now(UTC)
+            event_id = f"evt:{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z:{type}:{ulid.new().str}"
 
             prev_id, prev_hash = await self._latest_chain_tip()
 

@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends
 from app.dependencies import CurrentUser, get_audit_writer, get_cloudant, get_settings_dep
 from app.envelope import Envelope, ok
 from app.errors import BobStubError, ErrorCode, HeliosError
-from app.models.common import ReviewState, Subject
+from app.models.common import ReviewState
 from app.models.promote import (
     AutoFix,
     PromoteCancelResponse,
@@ -67,11 +67,9 @@ async def promote(
 
     # 3. Run region diff
     diff_response = region_atlas.diff_regions(source, target)
-    
+
     # 4. Apply substitutions to JCL
-    rewritten_jcl, substitution_trace = region_atlas.apply_substitutions(
-        jcl_source, source, target
-    )
+    rewritten_jcl, substitution_trace = region_atlas.apply_substitutions(jcl_source, source, target)
 
     # 5. Run JJSCAN+ rules on rewritten JCL
     scanner = Scanner(SEEDED_RULES)
@@ -84,7 +82,7 @@ async def promote(
         watsonx=None,  # Not needed for Phase 1 rules
     )
     rule_results, scan_duration_ms = scanner.scan(rule_ctx)
-    
+
     # Convert rule results to findings format
     findings = [
         {
@@ -124,7 +122,7 @@ async def promote(
     # 8. Apply auto-fixes
     auto_fixes_applied: list[AutoFix] = []
     auto_fixes_available: list[AutoFix] = []
-    
+
     if "generate_paired_backup" in body.auto_apply_fixes and backup_gap:
         # Generate backup JCL for protected resources
         for resource in target.protected_resources:
@@ -147,7 +145,7 @@ async def promote(
                         },
                     )
                 )
-    
+
     # Check for available but not applied fixes
     for finding in findings:
         if finding.get("auto_fixable") and "update_syslib" not in body.auto_apply_fixes:

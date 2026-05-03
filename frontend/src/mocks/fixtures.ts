@@ -106,8 +106,7 @@ export const HERO_FINDINGS: Finding[] = [
     id: "find:demo:copybook-drift",
     rule_id: "JJ-COPYBOOK-DRIFT-001",
     severity: "medium",
-    description:
-      "CUSTREC resolves to v3 in PROD.INT2.SYSLIB but v4 in PROD.INT3.SYSLIB.",
+    description: "CUSTREC resolves to v3 in PROD.INT2.SYSLIB but v4 in PROD.INT3.SYSLIB.",
     details: { copybook: "CUSTREC", source_version: "v3", target_version: "v4" },
     auto_fix_available: true,
     decision: "pending",
@@ -117,8 +116,7 @@ export const HERO_FINDINGS: Finding[] = [
     id: "find:demo:db2-plan",
     rule_id: "JJ-DB2-PLAN-MISMATCH-001",
     severity: "critical",
-    description:
-      "DSN SYSTEM(DB2I) PLAN(INT2.COLL) does not match int3 (DB2I / INT3.COLL).",
+    description: "DSN SYSTEM(DB2I) PLAN(INT2.COLL) does not match int3 (DB2I / INT3.COLL).",
     details: { in_jcl: "INT2.COLL", expected: "INT3.COLL" },
     auto_fix_available: true,
     decision: "pending",
@@ -159,11 +157,7 @@ export const HERO_QUEUE: QueueItem[] = [
       jcl: "CUST_DELETE_INACTIVE",
       target_region: "int3",
       score: 62,
-      top_reasons: [
-        "Backup gap (-30)",
-        "Copybook drift (-10)",
-        "JES class T → P (-3)",
-      ],
+      top_reasons: ["Backup gap (-30)", "Copybook drift (-10)", "JES class T → P (-3)"],
     },
   },
 ];

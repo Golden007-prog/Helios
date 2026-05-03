@@ -49,12 +49,7 @@ function sliceWithHighlights(
   return result;
 }
 
-export function SyslogPane({
-  rawText,
-  parserHighlights = [],
-  onSelect,
-  onCopy,
-}: SyslogPaneProps) {
+export function SyslogPane({ rawText, parserHighlights = [], onSelect, onCopy }: SyslogPaneProps) {
   const fragments = useMemo(
     () => sliceWithHighlights(rawText, parserHighlights),
     [rawText, parserHighlights],

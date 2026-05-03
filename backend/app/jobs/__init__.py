@@ -5,6 +5,6 @@
   generator and other long jobs).
 """
 
-from app.jobs.runner import JobRunner, JobState, JobRecord, get_job_runner
+from app.jobs.runner import JobRecord, JobRunner, JobState, get_job_runner
 
-__all__ = ["JobRunner", "JobState", "JobRecord", "get_job_runner"]
+__all__ = ["JobRecord", "JobRunner", "JobState", "get_job_runner"]

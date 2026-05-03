@@ -85,17 +85,15 @@ class AuditListener:
                 backoff = INITIAL_BACKOFF_S
             except asyncio.CancelledError:
                 raise
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 self.state.reconnects += 1
                 _log.warning(
                     "audit_listener.reconnect",
                     backoff_s=backoff,
                     reason=str(exc),
                 )
-                try:
+                with contextlib.suppress(TimeoutError):
                     await asyncio.wait_for(self._stop.wait(), timeout=backoff)
-                except asyncio.TimeoutError:
-                    pass
                 backoff = min(backoff * 2.0, MAX_BACKOFF_S)
 
     async def _consume_once(self) -> None:
@@ -128,6 +126,6 @@ def passes_rbac(event: dict[str, Any], user_email: str, user_roles: list[str]) -
 
     Today: every authenticated user can see every audit event for their
     shop. This stub is the integration point for Bob's full RBAC matrix
-    (Phase 1.5 polish): allow/deny per ``event.type`` × user role.
+    (Phase 1.5 polish): allow/deny per ``event.type`` x user role.
     """
     return True

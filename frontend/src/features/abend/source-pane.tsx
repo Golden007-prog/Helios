@@ -20,27 +20,16 @@ export interface SourcePaneProps {
 /** Lightweight COBOL-ish syntax colouring. We don't pull in Monaco for this
  * pass — a CSS+span approach gets us the demo-quality view without 1MB
  * of editor weight on the page. */
-function lineClasses(
-  line: string,
-  isJump: boolean,
-  inHighlightedParagraph: boolean,
-): string {
+function lineClasses(line: string, isJump: boolean, inHighlightedParagraph: boolean): string {
   return cn(
     "block whitespace-pre px-2 py-px transition-colors",
-    isJump
-      ? "bg-danger/10 ring-1 ring-danger/40"
-      : inHighlightedParagraph
-        ? "bg-warning/5"
-        : "",
+    isJump ? "bg-danger/10 ring-1 ring-danger/40" : inHighlightedParagraph ? "bg-warning/5" : "",
   );
 }
 
 /** Render a single line, adding inline highlight spans for the failing
  * field if it appears anywhere in the line. */
-function renderInlineField(
-  line: string,
-  fieldHighlight: string | undefined,
-): React.ReactNode {
+function renderInlineField(line: string, fieldHighlight: string | undefined): React.ReactNode {
   if (!fieldHighlight) return line;
   const idx = line.indexOf(fieldHighlight);
   if (idx === -1) return line;
@@ -73,9 +62,7 @@ export function SourcePane({
   // is missing from jsdom; guard so unit tests don't blow up.
   useEffect(() => {
     if (!jumpToLine || !ref.current) return;
-    const target = ref.current.querySelector<HTMLElement>(
-      `[data-line="${jumpToLine}"]`,
-    );
+    const target = ref.current.querySelector<HTMLElement>(`[data-line="${jumpToLine}"]`);
     if (target && typeof target.scrollIntoView === "function") {
       target.scrollIntoView({ block: "center", behavior: "smooth" });
     }
@@ -88,9 +75,7 @@ export function SourcePane({
         data-testid="source-empty"
       >
         <p className="text-sm">No source available</p>
-        <p className="mt-1 text-xs">
-          The COBOL artifact for this program isn't in the corpus.
-        </p>
+        <p className="mt-1 text-xs">The COBOL artifact for this program isn't in the corpus.</p>
       </div>
     );
   }
@@ -122,30 +107,19 @@ export function SourcePane({
   return (
     <div className="flex h-full flex-col" data-testid="source-pane">
       <header className="mb-2 flex items-center justify-between">
-        <span className="font-mono text-xs font-semibold">
-          {programName ?? "(unnamed source)"}
-        </span>
+        <span className="font-mono text-xs font-semibold">{programName ?? "(unnamed source)"}</span>
         {programName && onOpenInEditor && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onOpenInEditor(programName)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => onOpenInEditor(programName)}>
             Open in editor
           </Button>
         )}
       </header>
-      <div
-        ref={ref}
-        className="flex-1 overflow-auto rounded-md bg-bg-subtle font-mono text-xs"
-      >
+      <div ref={ref} className="flex-1 overflow-auto rounded-md bg-bg-subtle font-mono text-xs">
         {lines.map((line, i) => {
           const lineNo = i + 1;
           const isJump = lineNo === jumpToLine;
           const inHighlightedParagraph =
-            paragraphStart !== -1 &&
-            lineNo - 1 >= paragraphStart &&
-            lineNo - 1 <= paragraphEnd;
+            paragraphStart !== -1 && lineNo - 1 >= paragraphStart && lineNo - 1 <= paragraphEnd;
           return (
             <div
               key={i}
@@ -153,9 +127,7 @@ export function SourcePane({
               data-testid={isJump ? "jump-line" : undefined}
               className={lineClasses(line, isJump, inHighlightedParagraph)}
             >
-              <span className="mr-3 inline-block w-10 text-right text-fg-muted/70">
-                {lineNo}
-              </span>
+              <span className="mr-3 inline-block w-10 text-right text-fg-muted/70">{lineNo}</span>
               {renderInlineField(line, fieldHighlight)}
             </div>
           );

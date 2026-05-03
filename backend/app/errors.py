@@ -125,7 +125,9 @@ class BobStubError(HeliosError):
         self.spec_doc = spec_doc
 
 
-def _envelope(code: ErrorCode, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
+def _envelope(
+    code: ErrorCode, message: str, details: dict[str, Any] | None = None
+) -> dict[str, Any]:
     return {
         "ok": False,
         "error": {"code": code.value, "message": message, "details": details or {}},

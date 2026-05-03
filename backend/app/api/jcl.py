@@ -60,9 +60,7 @@ async def list_jcl(
     return ok(JCLListResponse(artifacts=items, total=len(items)))
 
 
-async def _load_jcl(
-    cloudant: CloudantClient, region: str, name: str, shop: str
-) -> dict:
+async def _load_jcl(cloudant: CloudantClient, region: str, name: str, shop: str) -> dict:
     result = await cloudant.find(
         "jcl_artifacts",
         {"shop": shop, "kind": "jcl_artifact", "region": region, "name": name},

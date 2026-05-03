@@ -45,14 +45,14 @@ registry = ToolRegistry(
 async def _get_iam_token() -> str:
     """Get or refresh IBM Cloud IAM token."""
     global _iam_token, _iam_expires_at
-    
+
     if not CLOUDANT_APIKEY:
         raise ToolError("CLOUDANT_APIKEY is not set", code="CONFIG_MISSING")
-    
+
     # Return cached token if still valid (with 60s buffer)
     if _iam_token and time.time() < _iam_expires_at - 60:
         return _iam_token
-    
+
     async with httpx.AsyncClient(timeout=15.0) as http:
         resp = await http.post(
             IAM_TOKEN_URL,

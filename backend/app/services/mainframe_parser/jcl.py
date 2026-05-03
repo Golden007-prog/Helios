@@ -43,7 +43,7 @@ class Step(BaseModel):
     exec_target: str
     exec_params: dict[str, str] = Field(default_factory=dict)
     dd_statements: list[DDStatement] = Field(default_factory=list)
-    db2_systems: list["Db2RunBlock"] = Field(default_factory=list)
+    db2_systems: list[Db2RunBlock] = Field(default_factory=list)
 
 
 class Db2RunBlock(BaseModel):
@@ -406,7 +406,7 @@ def parse_jcl(
 
             if op in {"IF", "ELSE", "ENDIF", "SET", "OUTPUT"}:
                 continue
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             record_gap(
                 gap_logger,
                 "jcl",
@@ -424,9 +424,7 @@ def _attach_instream(raw: str, artifact: JclArtifact) -> None:
     lines = raw.splitlines()
     in_instream = False
     target: DDStatement | None = None
-    flat_dds: list[DDStatement] = [
-        dd for step in artifact.steps for dd in step.dd_statements
-    ]
+    flat_dds: list[DDStatement] = [dd for step in artifact.steps for dd in step.dd_statements]
     instream_dds = [dd for dd in flat_dds if dd.is_instream]
     iter_dds = iter(instream_dds)
     # Match ``DD *`` followed by EOL, whitespace, or a comma (``DD *,SYMBOLS=...``).

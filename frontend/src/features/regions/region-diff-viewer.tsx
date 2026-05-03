@@ -95,9 +95,7 @@ export function RegionDiffViewer({
             type="button"
             className={cn(
               "rounded-md px-2 py-0.5",
-              filter === "changes"
-                ? "bg-bg-subtle text-fg"
-                : "text-fg-muted hover:bg-bg-subtle/50",
+              filter === "changes" ? "bg-bg-subtle text-fg" : "text-fg-muted hover:bg-bg-subtle/50",
             )}
             onClick={() => setFilter("changes")}
             data-testid="filter-changes"
@@ -108,9 +106,7 @@ export function RegionDiffViewer({
             type="button"
             className={cn(
               "rounded-md px-2 py-0.5",
-              filter === "all"
-                ? "bg-bg-subtle text-fg"
-                : "text-fg-muted hover:bg-bg-subtle/50",
+              filter === "all" ? "bg-bg-subtle text-fg" : "text-fg-muted hover:bg-bg-subtle/50",
             )}
             onClick={() => setFilter("all")}
             data-testid="filter-all"
@@ -122,12 +118,7 @@ export function RegionDiffViewer({
       <CardContent className="p-0">
         <ul role="list" className="divide-y divide-border">
           {visible.map((field) => (
-            <DiffRow
-              key={field.path}
-              field={field}
-              regionA={regionA}
-              regionB={regionB}
-            />
+            <DiffRow key={field.path} field={field} regionA={regionA} regionB={regionB} />
           ))}
         </ul>
       </CardContent>
@@ -162,25 +153,15 @@ function DiffRow({
       )}
     >
       <div className="flex items-center gap-2 px-4 py-2 text-sm">
-        <span
-          className={cn(
-            "h-2 w-2 shrink-0 rounded-full",
-            KIND_DOT[field.kind],
-          )}
-          aria-hidden
-        />
+        <span className={cn("h-2 w-2 shrink-0 rounded-full", KIND_DOT[field.kind])} aria-hidden />
         <code className="text-xs">{field.path}</code>
       </div>
       <div className="px-4 py-2 font-mono text-xs lg:border-l lg:border-border/40">
-        <div className="text-[10px] uppercase tracking-wider text-fg-muted/80">
-          {regionA}
-        </div>
+        <div className="text-[10px] uppercase tracking-wider text-fg-muted/80">{regionA}</div>
         {renderValue(field.a)}
       </div>
       <div className="px-4 py-2 font-mono text-xs lg:border-l lg:border-border/40">
-        <div className="text-[10px] uppercase tracking-wider text-fg-muted/80">
-          {regionB}
-        </div>
+        <div className="text-[10px] uppercase tracking-wider text-fg-muted/80">{regionB}</div>
         {renderValue(field.b)}
       </div>
       {hovered && explanation && (

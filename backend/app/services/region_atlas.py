@@ -118,9 +118,7 @@ def diff_regions(a: RegionProfile, b: RegionProfile) -> RegionDiffResponse:
     return RegionDiffResponse(a=a.name, b=b.name, fields=fields)
 
 
-def _walk_diff(
-    obj_a: Any, obj_b: Any, path: str, out: list[DiffField]
-) -> None:
+def _walk_diff(obj_a: Any, obj_b: Any, path: str, out: list[DiffField]) -> None:
     """Recursively walk two objects in deterministic field-declaration order
     and append ``DiffField`` rows to ``out``.
     """
@@ -161,22 +159,18 @@ def _walk_diff(
     # doesn't (preserves stable ordering when the two dicts are co-ordered).
     if isinstance(obj_a, dict) and isinstance(obj_b, dict):
         seen: set[str] = set()
-        for key in obj_a.keys():
+        for key in obj_a:
             seen.add(key)
             child_path = f"{path}.{key}" if path else key
             if key not in obj_b:
-                out.append(
-                    DiffField(path=child_path, a=obj_a[key], b=None, kind="removed")
-                )
+                out.append(DiffField(path=child_path, a=obj_a[key], b=None, kind="removed"))
             else:
                 _walk_diff(obj_a[key], obj_b[key], child_path, out)
-        for key in obj_b.keys():
+        for key in obj_b:
             if key in seen:
                 continue
             child_path = f"{path}.{key}" if path else key
-            out.append(
-                DiffField(path=child_path, a=None, b=obj_b[key], kind="added")
-            )
+            out.append(DiffField(path=child_path, a=None, b=obj_b[key], kind="added"))
         return
 
     # Lists — positional comparison with kind=added / removed for length deltas.
@@ -185,13 +179,9 @@ def _walk_diff(
         for i in range(max_len):
             child_path = f"{path}[{i}]"
             if i >= len(obj_a):
-                out.append(
-                    DiffField(path=child_path, a=None, b=obj_b[i], kind="added")
-                )
+                out.append(DiffField(path=child_path, a=None, b=obj_b[i], kind="added"))
             elif i >= len(obj_b):
-                out.append(
-                    DiffField(path=child_path, a=obj_a[i], b=None, kind="removed")
-                )
+                out.append(DiffField(path=child_path, a=obj_a[i], b=None, kind="removed"))
             else:
                 # Recurse so nested dicts/models inside list items still walk
                 # in field-declaration order.
@@ -268,11 +258,7 @@ def apply_substitutions(
     # appears at a dataset-name boundary (after an apostrophe / paren / DSN= /
     # whitespace / start-of-token), so we don't accidentally chew comment
     # narrative or program names.
-    if (
-        source_region.hlq
-        and target_region.hlq
-        and source_region.hlq != target_region.hlq
-    ):
+    if source_region.hlq and target_region.hlq and source_region.hlq != target_region.hlq:
         hlq_pat = re.compile(
             rf"(?<![A-Z0-9.]){re.escape(source_region.hlq)}(?=[.\s,'\"\)])",
             re.IGNORECASE,

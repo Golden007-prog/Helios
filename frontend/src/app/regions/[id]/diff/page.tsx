@@ -8,11 +8,7 @@ export function generateStaticParams() {
   return [{ id: "placeholder" }];
 }
 
-export default function RegionDiffPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function RegionDiffPage({ params }: { params: { id: string } }) {
   // ``RegionDiffClient`` reads the ``vs`` query string via
   // ``useSearchParams``. When statically exported, Next 14 needs the
   // search-params reader to be inside a Suspense boundary so the static

@@ -31,8 +31,9 @@ export function toGaugeBreakdown(server: ServerScoreBreakdown): {
       autoFixable: AUTO_FIXABLE_KEYS.has(key),
     }),
   );
-  const boosts = Object.entries(server.boosts ?? {}).map<ScoreBreakdownLine>(
-    ([key, amount]) => ({ key, amount }),
-  );
+  const boosts = Object.entries(server.boosts ?? {}).map<ScoreBreakdownLine>(([key, amount]) => ({
+    key,
+    amount,
+  }));
   return { deductions, boosts };
 }

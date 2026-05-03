@@ -120,7 +120,7 @@ class CloudantClient:
         try:
             data = await self._request("GET", "/")
             return True, data.get("version") if isinstance(data, dict) else None
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return False, str(exc)
 
     # --- IAM token --------------------------------------------------------
@@ -133,11 +133,7 @@ class CloudantClient:
         """
         if not self._live:
             raise CloudantError("Cloudant is in in-memory mode; no IAM exchange")
-        if (
-            not force_refresh
-            and self._iam_token
-            and time.time() < self._iam_expires_at - 60
-        ):
+        if not force_refresh and self._iam_token and time.time() < self._iam_expires_at - 60:
             return self._iam_token
         assert self._iam_http is not None
         resp = await self._iam_http.post(

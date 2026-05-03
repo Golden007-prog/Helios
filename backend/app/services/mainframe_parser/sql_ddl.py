@@ -145,8 +145,7 @@ _FK_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 _TYPE_RE = re.compile(
-    r"^(?P<type>[A-Z][A-Z0-9_]*)"
-    r"(?:\(\s*(?P<a>\d+)(?:\s*,\s*(?P<b>\d+))?\s*\))?",
+    r"^(?P<type>[A-Z][A-Z0-9_]*)" r"(?:\(\s*(?P<a>\d+)(?:\s*,\s*(?P<b>\d+))?\s*\))?",
     re.IGNORECASE,
 )
 
@@ -285,7 +284,7 @@ def parse_ddl(
             body = m.group("body")
             try:
                 columns, pk, fks = _parse_columns_and_constraints(body)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 record_gap(gap_logger, "sql_ddl", source_path or name, f"column parse: {exc}")
                 continue
             trailing = (m.group("trailing") or "").upper()
@@ -371,9 +370,7 @@ def diff_tables(a: TableDef, b: TableDef) -> SchemaDiff:
             va = getattr(ca, field_name)
             vb = getattr(cb, field_name)
             if va != vb:
-                diff.column_diffs.append(
-                    ColumnDiff(column=name, field=field_name, a=va, b=vb)
-                )
+                diff.column_diffs.append(ColumnDiff(column=name, field=field_name, a=va, b=vb))
 
     if a.primary_key != b.primary_key:
         diff.pk_diff = (a.primary_key, b.primary_key)

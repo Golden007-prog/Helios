@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Activity, Globe, Scan, Bug, Gauge, Inbox } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { BobStub } from "@/components/ui/bob-stub";
 

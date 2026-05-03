@@ -8,7 +8,7 @@ markers until implemented).
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import ulid
 from fastapi import APIRouter, Depends
@@ -22,7 +22,7 @@ from app.dependencies import (
 )
 from app.envelope import Envelope, ok
 from app.errors import BobStubError, ErrorCode, HeliosError
-from app.models.common import FindingState, Subject
+from app.models.common import FindingState
 from app.models.jjscan import (
     Finding,
     FindingAutoFixResponse,
@@ -56,7 +56,8 @@ async def scan(
         region_name = body.target_region
         jcl_name = None
     else:
-        assert body.jcl_name is not None and body.region is not None
+        assert body.jcl_name is not None
+        assert body.region is not None
         result = await cloudant.find(
             "jcl_artifacts",
             {
@@ -139,7 +140,7 @@ async def decide_finding(
             "state": FindingState.OPEN.value,
         }
 
-    decided_at = datetime.now(timezone.utc)
+    decided_at = datetime.now(UTC)
     after = {
         **existing,
         "state": body.decision.value,

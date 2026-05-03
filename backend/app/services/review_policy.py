@@ -24,6 +24,7 @@ from typing import Any, Literal
 
 import yaml
 
+
 def _resolve_default_policy_file() -> Path:
     """Find the default policy file under either the container layout
     (``/app/shared/...``) or the dev layout (``<repo>/shared/...``)."""
@@ -65,7 +66,7 @@ class ReviewPolicy:
         self._policies = policies
 
     @classmethod
-    def from_yaml(cls, path: Path | None = None) -> "ReviewPolicy":
+    def from_yaml(cls, path: Path | None = None) -> ReviewPolicy:
         path = path or DEFAULT_POLICY_FILE
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
         out: dict[str, list[_Rule]] = {}

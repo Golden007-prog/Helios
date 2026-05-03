@@ -31,37 +31,37 @@ def generate(request: BackupRequest, timestamp: datetime | None = None) -> Backu
     Implements backup generation per docs/PHASE_PLAN.md §1.3:
     - VSAM datasets → IDCAMS REPRO
     - DB2 tables → UNLOAD + IMAGE COPY
-    
+
     Backup DSN format: <region_hlq>.BAK.<resource_short>.D<yyjjj>.T<hhmmss>
-    
+
     Args:
         request: Backup request with resource name and region HLQ
         timestamp: Optional timestamp for deterministic backup names (testing)
     """
     # Use provided timestamp or current time
     ts = timestamp or request.timestamp or datetime.utcnow()
-    
+
     # Format timestamp components
     yyjjj = ts.strftime("%y%j")  # Year (2-digit) + Julian day
     hhmmss = ts.strftime("%H%M%S")  # Time
-    
+
     # Extract resource short name (last component after dots)
-    resource_parts = request.protected_resource.split('.')
+    resource_parts = request.protected_resource.split(".")
     resource_short = resource_parts[-1] if resource_parts else request.protected_resource
-    
+
     # Determine method based on resource name patterns
     # DB2 tables typically don't have dots or are in format SCHEMA.TABLE
     # VSAM datasets have multiple dots and often end with .PATH, .KSDS, etc.
-    is_vsam = '.' in request.protected_resource and any(
+    is_vsam = "." in request.protected_resource and any(
         request.protected_resource.upper().endswith(suffix)
-        for suffix in ['.PATH', '.PATH3', '.KSDS', '.ESDS', '.RRDS', '.CLUSTER']
+        for suffix in [".PATH", ".PATH3", ".KSDS", ".ESDS", ".RRDS", ".CLUSTER"]
     )
-    
+
     if is_vsam:
         # VSAM backup via IDCAMS REPRO
         method = "idcams_repro"
         backup_dsn = f"{request.region_hlq}.BAK.{resource_short}.D{yyjjj}.T{hhmmss}"
-        
+
         jcl_text = f"""//BACKUP   JOB (HELIOS),'BACKUP {resource_short}',
 //         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID
 //STEP1    EXEC PGM=IDCAMS,REGION=4M
@@ -77,7 +77,7 @@ def generate(request: BackupRequest, timestamp: datetime | None = None) -> Backu
         # DB2 table backup via UNLOAD + IMAGE COPY
         method = "unload+image_copy"
         backup_dsn = f"{request.region_hlq}.BAK.{resource_short}.D{yyjjj}.T{hhmmss}"
-        
+
         jcl_text = f"""//BACKUP   JOB (HELIOS),'BACKUP {resource_short}',
 //         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID
 //STEP1    EXEC PGM=DSNTIAUL
@@ -105,7 +105,7 @@ def generate(request: BackupRequest, timestamp: datetime | None = None) -> Backu
     FULL YES
 /*
 //"""
-    
+
     return BackupArtifact(
         backup_dataset_name=backup_dsn,
         jcl_text=jcl_text,

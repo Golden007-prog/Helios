@@ -7,13 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Finding, Severity } from "@/lib/api/types";
 
-const SEVERITY_ORDER: Severity[] = [
-  "critical",
-  "high",
-  "medium",
-  "low",
-  "info",
-];
+const SEVERITY_ORDER: Severity[] = ["critical", "high", "medium", "low", "info"];
 
 const SEVERITY_VARIANT: Record<Severity, "critical" | "high" | "medium" | "low" | "info"> = {
   critical: "critical",
@@ -69,12 +63,7 @@ const REASON_TAGS: { value: ReasonTag; label: string }[] = [
   { value: "custom", label: "Other (note in audit)" },
 ];
 
-export function FindingsList({
-  findings,
-  dissent = {},
-  onDecide,
-  onAutoFix,
-}: FindingsListProps) {
+export function FindingsList({ findings, dissent = {}, onDecide, onAutoFix }: FindingsListProps) {
   const groups = useMemo(() => groupBySeverity(findings), [findings]);
   const [collapsed, setCollapsed] = useState<Set<Severity>>(new Set());
   const [expandedFinding, setExpandedFinding] = useState<string | null>(null);
@@ -126,7 +115,9 @@ export function FindingsList({
             >
               <span className="flex items-center gap-2">
                 <Badge variant={SEVERITY_VARIANT[sev]}>{sev}</Badge>
-                <span className="text-fg-muted">{items.length} finding{items.length === 1 ? "" : "s"}</span>
+                <span className="text-fg-muted">
+                  {items.length} finding{items.length === 1 ? "" : "s"}
+                </span>
               </span>
               <span className="text-fg-muted">{isCollapsed ? "▸" : "▾"}</span>
             </button>
@@ -139,14 +130,10 @@ export function FindingsList({
                     dissent={dissent[finding.rule_id]}
                     expanded={expandedFinding === finding.id}
                     onToggleExpanded={() =>
-                      setExpandedFinding((prev) =>
-                        prev === finding.id ? null : finding.id,
-                      )
+                      setExpandedFinding((prev) => (prev === finding.id ? null : finding.id))
                     }
                     onAutoFix={onAutoFix}
-                    onAskReason={(decision) =>
-                      setReasonPicker({ findingId: finding.id, decision })
-                    }
+                    onAskReason={(decision) => setReasonPicker({ findingId: finding.id, decision })}
                   />
                 ))}
               </ul>
@@ -185,9 +172,7 @@ function FindingRow({
   onAskReason: (decision: "accept" | "dismiss") => void;
 }) {
   const dissentVisible =
-    dissent &&
-    dissent.totalCount > 0 &&
-    dissent.dismissedCount / dissent.totalCount >= 0.5;
+    dissent && dissent.totalCount > 0 && dissent.dismissedCount / dissent.totalCount >= 0.5;
 
   const location =
     typeof finding.details?.location === "string"
@@ -195,11 +180,7 @@ function FindingRow({
       : undefined;
 
   return (
-    <li
-      className="px-4 py-3"
-      data-testid={`finding-${finding.id}`}
-      data-rule={finding.rule_id}
-    >
+    <li className="px-4 py-3" data-testid={`finding-${finding.id}`} data-rule={finding.rule_id}>
       {dissentVisible && dissent && (
         <div
           role="alert"
@@ -221,9 +202,7 @@ function FindingRow({
         <code className="rounded bg-bg-subtle px-1.5 py-0.5 font-mono text-xs">
           {finding.rule_id}
         </code>
-        {location && (
-          <span className="text-xs text-fg-muted">{location}</span>
-        )}
+        {location && <span className="text-xs text-fg-muted">{location}</span>}
       </div>
 
       <p className="mt-2 text-sm">{finding.description}</p>
@@ -298,9 +277,7 @@ function ReasonPicker({
                 type="button"
                 onClick={() => onSubmit(tag.value)}
                 data-testid={`reason-${tag.value}`}
-                className={cn(
-                  "w-full rounded-md px-3 py-2 text-left text-sm hover:bg-bg-subtle",
-                )}
+                className={cn("w-full rounded-md px-3 py-2 text-left text-sm hover:bg-bg-subtle")}
               >
                 {tag.label}
               </button>
@@ -308,12 +285,7 @@ function ReasonPicker({
           ))}
         </ul>
         <div className="mt-3 flex justify-end">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onCancel}
-            data-testid="reason-cancel"
-          >
+          <Button size="sm" variant="ghost" onClick={onCancel} data-testid="reason-cancel">
             Cancel
           </Button>
         </div>

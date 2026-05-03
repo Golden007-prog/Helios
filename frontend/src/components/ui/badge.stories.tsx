@@ -8,7 +8,9 @@ const meta: Meta<typeof Badge> = {
 };
 export default meta;
 
-export const Critical: StoryObj<typeof Badge> = { args: { variant: "critical", children: "critical" } };
+export const Critical: StoryObj<typeof Badge> = {
+  args: { variant: "critical", children: "critical" },
+};
 export const High: StoryObj<typeof Badge> = { args: { variant: "high", children: "high" } };
 export const Medium: StoryObj<typeof Badge> = { args: { variant: "medium", children: "medium" } };
 export const Low: StoryObj<typeof Badge> = { args: { variant: "low", children: "low" } };

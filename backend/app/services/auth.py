@@ -6,13 +6,12 @@ docs/API.md §2. Production SSO is a Phase 2 item — see docs/ROADMAP.md.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from jose import jwt
 
 from app.config import Settings
 from app.models.user import AuthenticatedUser, Role
-
 
 # Demo users — must match docs/API.md §2 and the seed script.
 # `_id` strings are stable so tests can reference them.
@@ -60,7 +59,7 @@ def authenticate(email: str, password: str, settings: Settings) -> Authenticated
 
 def issue_token(user: AuthenticatedUser, settings: Settings) -> tuple[str, datetime]:
     """Mint an HS256 JWT carrying the user claims. Returns (token, expires_at)."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expires_at = now + timedelta(seconds=settings.jwt_ttl_seconds)
     payload = {
         "sub": user.user_id,

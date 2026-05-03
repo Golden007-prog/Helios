@@ -24,19 +24,16 @@ export const queryKeys = {
   },
   score: {
     weights: (region: string) => ["score", "weights", region] as const,
-    compute: (jclName: string, region: string) =>
-      ["score", "compute", jclName, region] as const,
+    compute: (jclName: string, region: string) => ["score", "compute", jclName, region] as const,
   },
   queue: {
     all: () => ["queue"] as const,
     list: () => ["queue", "list"] as const,
   },
   audit: {
-    list: (filters?: Record<string, string>) =>
-      ["audit", "list", filters ?? null] as const,
+    list: (filters?: Record<string, string>) => ["audit", "list", filters ?? null] as const,
   },
   runbooks: {
-    list: (filters?: Record<string, string>) =>
-      ["runbooks", "list", filters ?? null] as const,
+    list: (filters?: Record<string, string>) => ["runbooks", "list", filters ?? null] as const,
   },
 } as const;

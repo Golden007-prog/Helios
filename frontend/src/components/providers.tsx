@@ -63,9 +63,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       router.replace("/login");
     }
     if (env.useMsw) {
-      void import("@/mocks/browser").then((m) =>
-        m.startMockWorker().then(() => setMswReady(true)),
-      );
+      void import("@/mocks/browser").then((m) => m.startMockWorker().then(() => setMswReady(true)));
     }
     // pathname intentionally omitted — we only check on initial mount;
     // re-auth on route change is handled by the 401 retry above.

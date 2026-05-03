@@ -21,11 +21,7 @@ export const PendingPromote: Story = {
       payload: {
         jcl: "ZBNKDEL.jcl",
         score: 62,
-        top_reasons: [
-          "Backup gap (-30)",
-          "Copybook drift (-10)",
-          "JES class T → P (-3)",
-        ],
+        top_reasons: ["Backup gap (-30)", "Copybook drift (-10)", "JES class T → P (-3)"],
       },
     },
     currentUserEmail: "anil@meridianbank.demo",

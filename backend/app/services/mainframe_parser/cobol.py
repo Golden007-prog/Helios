@@ -112,8 +112,7 @@ def _strip_to_logical(line: str) -> tuple[str, str]:
 
 _PROGRAM_ID_RE = re.compile(r"\bPROGRAM-ID\s*\.\s*([A-Z][A-Z0-9-]*)\b", re.IGNORECASE)
 _COPY_RE = re.compile(
-    r"\bCOPY\s+(?P<name>[A-Z][A-Z0-9-]*)\s*"
-    r"(?P<replacing>REPLACING\b[^.]+)?\s*\.",
+    r"\bCOPY\s+(?P<name>[A-Z][A-Z0-9-]*)\s*" r"(?P<replacing>REPLACING\b[^.]+)?\s*\.",
     re.IGNORECASE | re.DOTALL,
 )
 _CALL_RE = re.compile(
@@ -225,7 +224,9 @@ def parse_cobol(
                 if me and me.start() > mb.end():
                     body = "\n".join(open_block["body"])
                     body = _EXEC_END_RE.split(body)[0]
-                    artifact.exec_blocks.append(_finalize_exec(open_block["kind"], open_block["line"], body))
+                    artifact.exec_blocks.append(
+                        _finalize_exec(open_block["kind"], open_block["line"], body)
+                    )
                     if kind == "sql":
                         artifact.has_sql = True
                     elif kind == "cics":
@@ -236,7 +237,9 @@ def parse_cobol(
             if me:
                 open_block["body"].append(content[: me.start()])
                 body = "\n".join(open_block["body"])
-                artifact.exec_blocks.append(_finalize_exec(open_block["kind"], open_block["line"], body))
+                artifact.exec_blocks.append(
+                    _finalize_exec(open_block["kind"], open_block["line"], body)
+                )
                 if open_block["kind"] == "sql":
                     artifact.has_sql = True
                 elif open_block["kind"] == "cics":

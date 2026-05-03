@@ -6,10 +6,6 @@ export function generateStaticParams() {
   return [{ id: "placeholder" }];
 }
 
-export default function RegionDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function RegionDetailPage({ params }: { params: { id: string } }) {
   return <RegionDetailClient id={params.id} />;
 }

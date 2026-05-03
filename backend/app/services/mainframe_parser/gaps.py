@@ -9,9 +9,10 @@ This keeps the demo robust to the long tail of mainframe dialects.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
+
 
 def _resolve_gaps_file() -> Path:
     """Find ``docs/PARSER_GAPS.md`` under either the container layout
@@ -51,7 +52,7 @@ class GapLogger:
         if not self.entries:
             return None
         with _LOCK:
-            now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            now = datetime.now(UTC).isoformat(timespec="seconds")
             lines: list[str] = []
             if not _GAPS_FILE.exists():
                 lines.append("# Parser Gaps\n")
@@ -67,8 +68,7 @@ class GapLogger:
             lines.append(f"\n## Run {now}\n")
             for entry in self.entries:
                 lines.append(
-                    f"- `{entry['parser']}` — `{entry['source_path']}`: "
-                    f"{entry['message']}\n"
+                    f"- `{entry['parser']}` — `{entry['source_path']}`: " f"{entry['message']}\n"
                 )
             _GAPS_FILE.parent.mkdir(parents=True, exist_ok=True)
             with _GAPS_FILE.open("a", encoding="utf-8") as fp:

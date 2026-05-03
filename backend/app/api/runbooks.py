@@ -5,9 +5,9 @@ Pure plumbing on top of Cloudant — no Bob stubs in this module.
 
 from __future__ import annotations
 
-import ulid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+import ulid
 from fastapi import APIRouter, Depends, Query
 
 from app.dependencies import CurrentUser, get_audit_writer, get_cloudant, get_settings_dep
@@ -28,7 +28,9 @@ router = APIRouter()
 
 
 def _doc_to_runbook(doc: dict) -> Runbook:
-    cleaned = {k: v for k, v in doc.items() if k not in {"_id", "_rev", "kind", "schema_version", "shop"}}
+    cleaned = {
+        k: v for k, v in doc.items() if k not in {"_id", "_rev", "kind", "schema_version", "shop"}
+    }
     cleaned["id"] = doc["_id"]
     return Runbook.model_validate(cleaned)
 
@@ -127,7 +129,7 @@ async def apply_runbook(
         raise HeliosError(ErrorCode.RUNBOOK_NOT_FOUND, f"No runbook '{runbook_id}'")
 
     application_id = f"app:{ulid.new().str}"
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     doc["last_applied_at"] = now.isoformat()
     await cloudant.put("runbooks", doc)
 

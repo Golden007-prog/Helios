@@ -36,7 +36,9 @@ async def list_regions(
     settings=Depends(get_settings_dep),
     tier: RegionTier | None = Query(default=None),
 ) -> Envelope[RegionListResponse]:
-    profiles = await region_atlas.list_regions(cloudant, settings.shop, tier=tier.value if tier else None)
+    profiles = await region_atlas.list_regions(
+        cloudant, settings.shop, tier=tier.value if tier else None
+    )
     items = [RegionListItem(name=p.name, tier=p.tier, hlq=p.hlq) for p in profiles]
     return ok(RegionListResponse(regions=items, total=len(items)))
 

@@ -1,10 +1,10 @@
 name: Backend — deploy to Code Engine
+# Manual-dispatch only. The push trigger was removed because:
+# 1. The repo's IBM Cloud account is the watsonx Challenge sandbox without
+#    Code Engine project-create permissions.
+# 2. No IBM_CLOUD_API_KEY secret is configured in repo Settings → Secrets.
+# Re-enable the push trigger here once both are in place.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-deploy.yml"
   workflow_dispatch:
 
 concurrency:

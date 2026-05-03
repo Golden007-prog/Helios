@@ -36,10 +36,7 @@ export default function JjscanPage() {
 
   return (
     <>
-      <PageHeader
-        title="JJSCAN+"
-        description="Static JCL analysis for the four seeded rules."
-      />
+      <PageHeader title="JJSCAN+" description="Static JCL analysis for the four seeded rules." />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -74,10 +71,7 @@ export default function JjscanPage() {
               />
             </div>
             <div className="flex justify-end">
-              <Button
-                onClick={() => submit.mutate()}
-                disabled={!source.trim() || submit.isPending}
-              >
+              <Button onClick={() => submit.mutate()} disabled={!source.trim() || submit.isPending}>
                 {submit.isPending ? "Submitting…" : "Run scan"}
               </Button>
             </div>

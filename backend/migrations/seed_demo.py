@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import yaml
@@ -39,7 +39,7 @@ SHOP = "meridianbank"
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _ts(now: datetime) -> tuple[str, int]:
@@ -167,12 +167,8 @@ async def _seed_runbooks(cloudant: CloudantClient) -> int:
         "S0C7_CUSTPROC_age_calc.md": [
             {"abend_code": "S0C7", "program": "CUSTPROC", "paragraph": "2300-CALC-RETIREMENT"}
         ],
-        "SQLCODE_805_int2_bind.md": [
-            {"abend_code": "SQLCODE-805", "program": "CUSTDEL"}
-        ],
-        "IEC141I_member_not_found.md": [
-            {"abend_code": "IEC141I", "program": None}
-        ],
+        "SQLCODE_805_int2_bind.md": [{"abend_code": "SQLCODE-805", "program": "CUSTDEL"}],
+        "IEC141I_member_not_found.md": [{"abend_code": "IEC141I", "program": None}],
     }
     for f in files:
         title = f.stem.replace("_", " ")

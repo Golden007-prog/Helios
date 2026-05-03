@@ -53,14 +53,8 @@ function summariseReasons(payload: Record<string, unknown>): string[] {
       }
     }
   }
-  if (
-    reasons.length === 0 &&
-    payload.breakdown &&
-    typeof payload.breakdown === "object"
-  ) {
-    const entries = Object.entries(
-      payload.breakdown as Record<string, unknown>,
-    )
+  if (reasons.length === 0 && payload.breakdown && typeof payload.breakdown === "object") {
+    const entries = Object.entries(payload.breakdown as Record<string, unknown>)
       .filter(([_k, v]) => typeof v === "number" && v > 0)
       .sort((a, b) => Number(b[1]) - Number(a[1]))
       .slice(0, 3)
@@ -79,13 +73,9 @@ export function QueueCard({
   selected,
   onSelect,
 }: QueueCardProps) {
-  const isSelfReview =
-    Boolean(currentUserEmail) && currentUserEmail === item.initiator;
+  const isSelfReview = Boolean(currentUserEmail) && currentUserEmail === item.initiator;
   const reasons = summariseReasons(item.payload);
-  const score =
-    typeof item.payload.score === "number"
-      ? (item.payload.score as number)
-      : null;
+  const score = typeof item.payload.score === "number" ? (item.payload.score as number) : null;
 
   return (
     <Card
@@ -100,17 +90,11 @@ export function QueueCard({
     >
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle className="text-sm">
-            {String(item.payload.jcl ?? item.type)}
-          </CardTitle>
+          <CardTitle className="text-sm">{String(item.payload.jcl ?? item.type)}</CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant={STATE_VARIANT[item.state]}>{item.state}</Badge>
             {score !== null && (
-              <Badge
-                variant={
-                  score >= 80 ? "low" : score >= 60 ? "medium" : "critical"
-                }
-              >
+              <Badge variant={score >= 80 ? "low" : score >= 60 ? "medium" : "critical"}>
                 score {score}
               </Badge>
             )}
@@ -124,10 +108,7 @@ export function QueueCard({
         </div>
 
         {reasons.length > 0 && (
-          <ul
-            className="mb-3 space-y-1 text-xs"
-            data-testid={`queue-reasons-${item.event_id}`}
-          >
+          <ul className="mb-3 space-y-1 text-xs" data-testid={`queue-reasons-${item.event_id}`}>
             {reasons.map((r, i) => (
               <li key={i} className="text-fg-muted">
                 • {r}

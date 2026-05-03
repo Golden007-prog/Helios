@@ -34,24 +34,30 @@ class ScoreContext:
 
 # Default penalty + bonus weights from docs/CONFIDENCE_SCORE.md §Default weights.
 # Region overrides (in ``ScoreContext.region_weights``) merge over these.
-DEFAULTS = {
-    "severity": {
-        "critical": 25,
-        "high": 10,
-        "medium": 5,
-        "low": 2,
-        "info": 0,
-    },
+# Split into two constants so mypy can infer their concrete types: severity
+# is a flat dict[str, int]; the top-level scalars carry the other penalties.
+DEFAULT_SEVERITY: dict[str, int] = {
+    "critical": 25,
+    "high": 10,
+    "medium": 5,
+    "low": 2,
+    "info": 0,
+}
+
+DEFAULT_PENALTIES: dict[str, int] = {
     "region_mismatch_per_resource": 15,
     "backup_gap": 30,
     "historical_abend_per_incident_30d": 5,
     "spec_match_bonus": 10,
 }
 
+# Composite view kept for callers that want the merged shape (test_score.py).
+DEFAULTS: dict[str, Any] = {"severity": DEFAULT_SEVERITY, **DEFAULT_PENALTIES}
+
 
 def default_weights() -> dict[str, int]:
     """Flat dict of severity-weight defaults — used by the GET /weights API."""
-    return dict(DEFAULTS["severity"])
+    return dict(DEFAULT_SEVERITY)
 
 
 def _resolve_weights(region_overrides: dict[str, int]) -> dict[str, Any]:
@@ -62,13 +68,8 @@ def _resolve_weights(region_overrides: dict[str, int]) -> dict[str, Any]:
     (``{"backup_gap": 60}``); both forms are supported.
     """
     merged: dict[str, Any] = {
-        "severity": dict(DEFAULTS["severity"]),
-        "region_mismatch_per_resource": DEFAULTS["region_mismatch_per_resource"],
-        "backup_gap": DEFAULTS["backup_gap"],
-        "historical_abend_per_incident_30d": DEFAULTS[
-            "historical_abend_per_incident_30d"
-        ],
-        "spec_match_bonus": DEFAULTS["spec_match_bonus"],
+        "severity": dict(DEFAULT_SEVERITY),
+        **DEFAULT_PENALTIES,
     }
     if not region_overrides:
         return merged
@@ -124,8 +125,8 @@ def compute(
 
     # 2. Region mismatches.
     if context.region_mismatch_count:
-        deductions["region_mismatch"] = (
-            context.region_mismatch_count * int(weights["region_mismatch_per_resource"])
+        deductions["region_mismatch"] = context.region_mismatch_count * int(
+            weights["region_mismatch_per_resource"]
         )
 
     # 3. Backup gap.

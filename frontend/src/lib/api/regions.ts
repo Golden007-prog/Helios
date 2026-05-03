@@ -1,9 +1,5 @@
 import { apiRequest } from "./client";
-import type {
-  RegionDiffResponse,
-  RegionListItem,
-  RegionProfile,
-} from "./types";
+import type { RegionDiffResponse, RegionListItem, RegionProfile } from "./types";
 
 export interface RegionListResponse {
   regions: RegionListItem[];

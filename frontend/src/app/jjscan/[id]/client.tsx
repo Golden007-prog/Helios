@@ -67,9 +67,7 @@ export default function ScanJobClient({ id }: { id: string }) {
       {job.data && (
         <FindingsList
           findings={job.data.findings}
-          onDecide={(findingId, decision, tag) =>
-            decide.mutate({ findingId, decision, tag })
-          }
+          onDecide={(findingId, decision, tag) => decide.mutate({ findingId, decision, tag })}
           onAutoFix={(findingId) => autoFix.mutate(findingId)}
         />
       )}

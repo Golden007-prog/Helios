@@ -6,7 +6,7 @@ and the WebSocket broadcaster are wired in :mod:`app.api.ws_queue`.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Query
 
@@ -48,11 +48,7 @@ async def list_queue(
     settings=Depends(get_settings_dep),
 ) -> Envelope[QueueListResponse]:
     result = await audit.query(limit=200)
-    docs = [
-        d
-        for d in result.get("docs", [])
-        if d.get("extra", {}).get("review_required")
-    ]
+    docs = [d for d in result.get("docs", []) if d.get("extra", {}).get("review_required")]
     if state:
         docs = [
             d
@@ -60,7 +56,9 @@ async def list_queue(
             if d.get("extra", {}).get("review_state", "pending_review") == state.value
         ]
     items = [_to_queue_item(d) for d in docs]
-    pending = sum(1 for d in docs if d.get("extra", {}).get("review_state") in (None, "pending_review"))
+    pending = sum(
+        1 for d in docs if d.get("extra", {}).get("review_state") in (None, "pending_review")
+    )
     return ok(QueueListResponse(items=items, pending_count=pending, last_seq=None))
 
 
@@ -105,7 +103,7 @@ async def _decide(
             ErrorCode.SELF_REVIEW_FORBIDDEN, "Initiator cannot review their own request"
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     audit_event = await audit.write_event(
         type=f"review_{new_state.value}",
         actor=user.email,
@@ -143,6 +141,4 @@ async def since(
             continue
         if doc.get("extra", {}).get("review_required"):
             items.append(_to_queue_item(doc))
-    return ok(
-        QueueSinceResponse(items=items, last_seq=str(feed.get("last_seq", seq)))
-    )
+    return ok(QueueSinceResponse(items=items, last_seq=str(feed.get("last_seq", seq))))

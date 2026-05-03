@@ -48,9 +48,7 @@ class Settings(BaseSettings):
     # --- HTTP server -----------------------------------------------------
     host: str = "0.0.0.0"
     port: int = 8080
-    cors_origins: str = Field(
-        default="http://localhost:3000,https://golden007-prog.github.io"
-    )
+    cors_origins: str = Field(default="http://localhost:3000,https://golden007-prog.github.io")
 
     # --- Auth ------------------------------------------------------------
     # JWT_SECRET is per-developer; the seeded demo user passwords are fixed.
@@ -92,7 +90,9 @@ class Settings(BaseSettings):
     def _strip_origins(cls, v: str) -> str:
         return ",".join(part.strip() for part in v.split(",") if part.strip())
 
-    @field_validator("cloudant_url", "cloudant_apikey", "watsonx_apikey", "watsonx_project_id", mode="before")
+    @field_validator(
+        "cloudant_url", "cloudant_apikey", "watsonx_apikey", "watsonx_project_id", mode="before"
+    )
     @classmethod
     def _empty_to_none(cls, v: object) -> object:
         # `.env.example` ships empty values; treat "" as not-set so the

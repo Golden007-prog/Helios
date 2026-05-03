@@ -25,7 +25,8 @@ from app.models.score import (
     WeightsUpdateRequest,
     WeightsUpdateResponse,
 )
-from app.services import region_atlas, score as score_engine
+from app.services import region_atlas
+from app.services import score as score_engine
 from app.services.audit_writer import AuditWriter
 from app.services.cloudant import CloudantClient
 from app.services.jjscan import Scanner
@@ -35,9 +36,7 @@ from app.services.jjscan.rules import SEEDED_RULES
 router = APIRouter()
 
 
-_DELETE_TOKEN_RE = re.compile(
-    r"\b(?:DELETE|DROP|PURGE|REMOVE)\b", re.IGNORECASE
-)
+_DELETE_TOKEN_RE = re.compile(r"\b(?:DELETE|DROP|PURGE|REMOVE)\b", re.IGNORECASE)
 _BACKUP_TOKEN_RE = re.compile(
     r"\b(?:UNLOAD|IMAGE\s+COPY|IMAGECOPY|IDCAMS\s+REPRO|DSNTIAUL|IEBCOPY|XMIT)\b",
     re.IGNORECASE,
@@ -53,20 +52,14 @@ def _detect_backup_gap(jcl_source: str, protected: list[str]) -> bool:
     """
     if not protected:
         return False
-    code_lines = [
-        line for line in jcl_source.splitlines() if not line.startswith("//*")
-    ]
+    code_lines = [line for line in jcl_source.splitlines() if not line.startswith("//*")]
     code = "\n".join(code_lines)
     if not _DELETE_TOKEN_RE.search(code):
         return False
-    if _BACKUP_TOKEN_RE.search(code):
-        return False
-    return True
+    return not _BACKUP_TOKEN_RE.search(code)
 
 
-async def _resolve_jcl_source(
-    body: ScoreRequest, cloudant: CloudantClient, shop: str
-) -> str:
+async def _resolve_jcl_source(body: ScoreRequest, cloudant: CloudantClient, shop: str) -> str:
     if body.jcl_source is not None:
         return body.jcl_source
     if not body.jcl_name:
@@ -238,9 +231,11 @@ async def override_score(
     original = await cloudant.get("audit_log", event_id)
     if not original:
         raise HeliosError(ErrorCode.EVENT_NOT_FOUND, f"No event '{event_id}'")
-    original_score = original.get("extra", {}).get("confidence_score") or original.get(
-        "after", {}
-    ).get("current_confidence_score") or 0
+    original_score = (
+        original.get("extra", {}).get("confidence_score")
+        or original.get("after", {}).get("current_confidence_score")
+        or 0
+    )
 
     audit_event = await audit.write_event(
         type="score_override",

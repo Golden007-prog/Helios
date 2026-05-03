@@ -32,10 +32,11 @@ import hashlib
 import json
 import sys
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 import yaml
 
@@ -89,7 +90,7 @@ NEW_DATABASES = [
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
 def _hash_text(text: str) -> str:
@@ -168,8 +169,10 @@ async def _seed_jcl(
     for jcl in files:
         try:
             text = jcl.read_text(encoding="utf-8", errors="replace")
-            ast = parse_jcl(text, name=jcl.stem.upper(), source_path=str(jcl), gap_logger=gap_logger)
-        except Exception as exc:  # noqa: BLE001
+            ast = parse_jcl(
+                text, name=jcl.stem.upper(), source_path=str(jcl), gap_logger=gap_logger
+            )
+        except Exception as exc:
             gap_logger.record("jcl", str(jcl), f"unhandled: {exc}")
             continue
         doc = {
@@ -202,7 +205,7 @@ async def _seed_cobol(
         try:
             text = cbl.read_text(encoding="utf-8", errors="replace")
             ast = parse_cobol(text, source_path=str(cbl), gap_logger=gap_logger)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             gap_logger.record("cobol", str(cbl), f"unhandled: {exc}")
             continue
         if ast.program_id == "UNKNOWN":
@@ -235,7 +238,7 @@ async def _seed_pli(
         try:
             text = pli.read_text(encoding="utf-8", errors="replace")
             ast = parse_pli(text, source_path=str(pli), gap_logger=gap_logger)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             gap_logger.record("pli", str(pli), f"unhandled: {exc}")
             continue
         doc = {
@@ -311,7 +314,7 @@ async def _seed_procs(
                 source_path=str(prc),
                 gap_logger=gap_logger,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             gap_logger.record("proc", str(prc), f"unhandled: {exc}")
             continue
         doc = {
@@ -343,7 +346,7 @@ async def _seed_ddl(
         try:
             text = sql.read_text(encoding="utf-8", errors="replace")
             tables = parse_ddl(text, dialect=dialect, source_path=str(sql), gap_logger=gap_logger)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             gap_logger.record("sql_ddl", str(sql), f"unhandled: {exc}")
             continue
         for t in tables:
@@ -669,7 +672,11 @@ def _find_cobol_check_pairs() -> list[tuple[str, Path, Path]]:
             for p in list(d.glob("*.CBL")) + list(d.glob("*.cbl"))
             if not p.stem.upper().endswith("-PADDED")
         }
-        for p in list(d.glob("*-padded.CBL")) + list(d.glob("*-padded.cbl")) + list(d.glob("*-PADDED.CBL")):
+        for p in (
+            list(d.glob("*-padded.CBL"))
+            + list(d.glob("*-padded.cbl"))
+            + list(d.glob("*-PADDED.CBL"))
+        ):
             base = p.stem.upper().removesuffix("-PADDED")
             plain = plain_files.get(base)
             if plain is not None:
@@ -718,9 +725,7 @@ async def _seed_copybook_variants_table(cloudant: CloudantClient) -> int:
     ``corpus_index`` so the UI can render the drift-detection table without
     re-querying every copybook artifact.
     """
-    res = await cloudant.find(
-        "copybook_artifacts", {"shop": DEMO_SHOP}, limit=10000
-    )
+    res = await cloudant.find("copybook_artifacts", {"shop": DEMO_SHOP}, limit=10000)
     rows: list[dict[str, Any]] = []
     for d in res.get("docs", []):
         rows.append(
@@ -799,9 +804,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "source_artifact": "01_BankDemo/sources/sql/DB2_DDL/ZBNKACC.sql",
         "source_region": "bnk_db2",
         "target_region": "bnk_xdb",
-        "expected_findings": [
-            {"rule_id": "SCHEMA_METADATA_DRIFT", "severity": "medium"}
-        ],
+        "expected_findings": [{"rule_id": "SCHEMA_METADATA_DRIFT", "severity": "medium"}],
         "expected_score_trajectory": [85],
     },
     {
@@ -986,7 +989,7 @@ async def _seed_demo_dissent(cloudant: CloudantClient) -> int:
     """Nine prior dissent events on JJ-COPYBOOK-DRIFT-001 in the new shop."""
     from datetime import timedelta
 
-    base = datetime.now(timezone.utc) - timedelta(days=30)
+    base = datetime.now(UTC) - timedelta(days=30)
     docs: list[dict[str, Any]] = []
     for i in range(7):
         ts = base + timedelta(days=i * 2)
@@ -1155,23 +1158,28 @@ async def main(argv: list[str] | None = None) -> int:
 
     report = await seed_all(cloudant, packs=pack_filter)
 
-    print(json.dumps({
-        "shop": DEMO_SHOP,
-        "regions": report.regions,
-        "users": report.users,
-        "jcl": report.jcl,
-        "cobol": report.cobol,
-        "pli": report.pli,
-        "copybooks": report.copybooks,
-        "procs": report.procs,
-        "ddl_tables": report.ddl_tables,
-        "fixtures": report.fixtures,
-        "scenarios": report.scenarios,
-        "abend_examples": report.abend_examples,
-        "learning_events": report.learning_events,
-        "gaps": report.gaps,
-        "by_pack": dict(report.by_pack),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "shop": DEMO_SHOP,
+                "regions": report.regions,
+                "users": report.users,
+                "jcl": report.jcl,
+                "cobol": report.cobol,
+                "pli": report.pli,
+                "copybooks": report.copybooks,
+                "procs": report.procs,
+                "ddl_tables": report.ddl_tables,
+                "fixtures": report.fixtures,
+                "scenarios": report.scenarios,
+                "abend_examples": report.abend_examples,
+                "learning_events": report.learning_events,
+                "gaps": report.gaps,
+                "by_pack": dict(report.by_pack),
+            },
+            indent=2,
+        )
+    )
 
     await cloudant.close()
     return 0

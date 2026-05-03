@@ -59,9 +59,7 @@ export const handlers = [
   http.get(`${API}/auth/me`, () => envelope({ user: MAYA })),
 
   // --- Regions ----------------------------------------------------------
-  http.get(`${API}/api/regions`, () =>
-    envelope({ regions: REGIONS, total: REGIONS.length }),
-  ),
+  http.get(`${API}/api/regions`, () => envelope({ regions: REGIONS, total: REGIONS.length })),
   http.get(`${API}/api/regions/:name`, ({ params }) => {
     const profile = REGION_PROFILES[params.name as string];
     return profile
@@ -91,8 +89,7 @@ export const handlers = [
   http.get(`${API}/api/regions/:a/diff/:b`, ({ params }) => {
     const a = params.a as string;
     const b = params.b as string;
-    const isHeroPair =
-      (a === "int2" && b === "int3") || (a === "int3" && b === "int2");
+    const isHeroPair = (a === "int2" && b === "int3") || (a === "int3" && b === "int2");
     return envelope({
       a,
       b,

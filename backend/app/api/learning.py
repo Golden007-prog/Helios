@@ -109,6 +109,4 @@ async def runbook_rank(
         for d in result.get("docs", [])
     ]
     runbooks.sort(key=lambda r: (-r.success_count, r.failure_count))
-    return ok(
-        RunbookRankResponse(abend_code=abend_code, program=program, runbooks=runbooks)
-    )
+    return ok(RunbookRankResponse(abend_code=abend_code, program=program, runbooks=runbooks))

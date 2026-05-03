@@ -32,7 +32,6 @@ from app.services.jjscan.framework import (
     RuleSeverity,
 )
 
-
 # ---------------------------------------------------------------------------
 # Shared parsing helpers
 # ---------------------------------------------------------------------------
@@ -44,9 +43,7 @@ _EXEC_PROC_RE = re.compile(
 _PLAN_RE = re.compile(r"\bPLAN\(([A-Z][A-Z0-9$#@_-]{0,7})\)", re.IGNORECASE)
 _DSN_SYSTEM_RE = re.compile(r"\bDSN\s+SYSTEM\(([A-Z0-9]{1,4})\)", re.IGNORECASE)
 _SUBSYS_RE = re.compile(r"\bSUBSYS=([A-Z0-9]{1,4})", re.IGNORECASE)
-_DD_OVERRIDE_RE = re.compile(
-    r"^//(\S+)\.(\S+)\s+DD\s+(.+)$", re.IGNORECASE | re.MULTILINE
-)
+_DD_OVERRIDE_RE = re.compile(r"^//(\S+)\.(\S+)\s+DD\s+(.+)$", re.IGNORECASE | re.MULTILINE)
 # SYSLIB DD points to a copybook library; if the chain references a
 # region-prefixed dataset that doesn't match the target region's HLQ, the
 # copybook resolves through a stale chain (drift). Matches both the
@@ -97,10 +94,7 @@ class CopybookDriftRule(Rule):
 
     rule_id = "JJ-COPYBOOK-DRIFT-001"
     severity = RuleSeverity.HIGH
-    description = (
-        "Copybook resolves to a different version in the target region's "
-        "SYSLIB chain"
-    )
+    description = "Copybook resolves to a different version in the target region's " "SYSLIB chain"
 
     def run(self, ctx: RuleContext) -> list[RuleResult]:
         out: list[RuleResult] = []
@@ -169,7 +163,9 @@ class CopybookDriftRule(Rule):
                     and not dsn.startswith(target_hlq)
                     and target_name
                     and target_name not in dsn
-                    and any(seg.startswith("INT") or seg.startswith("DEV") for seg in dsn.split("."))
+                    and any(
+                        seg.startswith("INT") or seg.startswith("DEV") for seg in dsn.split(".")
+                    )
                 ):
                     out.append(
                         RuleResult(
@@ -348,9 +344,7 @@ class ProcOverrideConflictRule(Rule):
             destructive = any("DISP=OLD" in v.upper() for v in distinct) and any(
                 "DISP=SHR" in v.upper() or "DISP=MOD" in v.upper() for v in distinct
             )
-            severity = (
-                RuleSeverity.MEDIUM if destructive else RuleSeverity.LOW
-            )
+            severity = RuleSeverity.MEDIUM if destructive else RuleSeverity.LOW
             out.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -383,9 +377,7 @@ class Db2PlanMismatchRule(Rule):
 
     rule_id = "JJ-DB2-PLAN-MISMATCH-001"
     severity = RuleSeverity.CRITICAL
-    description = (
-        "DB2 plan/subsystem in JCL does not match target region configuration"
-    )
+    description = "DB2 plan/subsystem in JCL does not match target region configuration"
 
     def run(self, ctx: RuleContext) -> list[RuleResult]:
         out: list[RuleResult] = []

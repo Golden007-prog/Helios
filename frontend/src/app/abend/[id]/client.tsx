@@ -8,10 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisPane } from "@/features/abend/analysis-pane";
 import { SourcePane } from "@/features/abend/source-pane";
 import { SyslogPane } from "@/features/abend/syslog-pane";
-import type {
-  AbendAnalysisResponse,
-  ParserHighlight,
-} from "@/features/abend/types";
+import type { AbendAnalysisResponse, ParserHighlight } from "@/features/abend/types";
 import { apiRequest } from "@/lib/api/client";
 import { queryKeys } from "@/lib/api/keys";
 
@@ -20,16 +17,10 @@ interface AbendDetailDoc extends AbendAnalysisResponse {
   source_text?: string;
 }
 
-function buildHighlights(
-  raw: string,
-  abend: AbendAnalysisResponse,
-): ParserHighlight[] {
+function buildHighlights(raw: string, abend: AbendAnalysisResponse): ParserHighlight[] {
   const out: ParserHighlight[] = [];
   const seen = new Set<string>();
-  const push = (
-    value: string | null | undefined,
-    kind: ParserHighlight["kind"],
-  ) => {
+  const push = (value: string | null | undefined, kind: ParserHighlight["kind"]) => {
     if (!value) return;
     const idx = raw.indexOf(value);
     if (idx === -1) return;
@@ -55,18 +46,13 @@ export default function AbendDetailClient({ id }: { id: string }) {
   });
 
   const highlights = useMemo(
-    () =>
-      event.data?.raw_text
-        ? buildHighlights(event.data.raw_text, event.data)
-        : [],
+    () => (event.data?.raw_text ? buildHighlights(event.data.raw_text, event.data) : []),
     [event.data],
   );
 
   return (
     <>
-      <Breadcrumbs
-        items={[{ label: "ABEND Archaeologist", href: "/abend" }, { label: id }]}
-      />
+      <Breadcrumbs items={[{ label: "ABEND Archaeologist", href: "/abend" }, { label: id }]} />
       <PageHeader title="ABEND analysis" />
       {event.isLoading && <Skeleton className="h-[70vh]" />}
       {event.data && (
@@ -76,10 +62,7 @@ export default function AbendDetailClient({ id }: { id: string }) {
               rawText={event.data.raw_text ?? ""}
               parserHighlights={highlights}
               onSelect={(kind, _value) => {
-                if (
-                  kind === "paragraph" &&
-                  event.data?.source_trace.line
-                ) {
+                if (kind === "paragraph" && event.data?.source_trace.line) {
                   setJumpLine(event.data.source_trace.line);
                 }
               }}
@@ -90,12 +73,8 @@ export default function AbendDetailClient({ id }: { id: string }) {
               programName={event.data.failing_step.program ?? undefined}
               sourceText={event.data.source_text ?? ""}
               jumpToLine={jumpLine ?? event.data.source_trace.line ?? undefined}
-              paragraphHighlight={
-                event.data.source_trace.paragraph ?? undefined
-              }
-              fieldHighlight={
-                event.data.source_trace.highlighted_field ?? undefined
-              }
+              paragraphHighlight={event.data.source_trace.paragraph ?? undefined}
+              fieldHighlight={event.data.source_trace.highlighted_field ?? undefined}
             />
           </ResizablePane>
           <ResizablePane label="Analysis">
@@ -107,13 +86,7 @@ export default function AbendDetailClient({ id }: { id: string }) {
   );
 }
 
-function ResizablePane({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function ResizablePane({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section
       aria-label={label}

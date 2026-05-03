@@ -13,8 +13,7 @@ const EXPLANATIONS: Record<string, string> = {
     "RACF group used as default authorization. Mismatch can cause SQLCODE -922 or open failures.",
   "jes.class_":
     "JES execution class. Drives priority + initiator selection; production typically uses a dedicated class.",
-  "jes.sysout_class":
-    "JES sysout class. Wrong class can route prints to the wrong destination.",
+  "jes.sysout_class": "JES sysout class. Wrong class can route prints to the wrong destination.",
   scheduler_queue:
     "Scheduler queue the job is submitted into. Mismatch = job lands on the wrong tier's batch window.",
   volser_pattern:
@@ -25,8 +24,7 @@ const EXPLANATIONS: Record<string, string> = {
     "GDG generation retention count. Different retention = downstream jobs may read the wrong generation.",
   confidence_weight_overrides:
     "Per-region overrides for the Confidence Score formula. Stricter weights = lower scores at the same finding count.",
-  tier:
-    "Region tier (development / integration / production). Drives review-required defaults and gating thresholds.",
+  tier: "Region tier (development / integration / production). Drives review-required defaults and gating thresholds.",
 };
 
 export function explainPath(path: string): string | null {

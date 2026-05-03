@@ -63,14 +63,14 @@ def _assert_model_allowed(model_id: str) -> None:
 async def _get_iam_token() -> str:
     """Get or refresh IBM Cloud IAM token."""
     global _iam_token, _iam_expires_at
-    
+
     if not WATSONX_APIKEY:
         raise ToolError("WATSONX_APIKEY is not set", code="CONFIG_MISSING")
-    
+
     # Return cached token if still valid (with 60s buffer)
     if _iam_token and time.time() < _iam_expires_at - 60:
         return _iam_token
-    
+
     async with httpx.AsyncClient(timeout=15.0) as http:
         resp = await http.post(
             IAM_TOKEN_URL,
@@ -102,12 +102,12 @@ async def _generate_text(
     """Call watsonx.ai text generation API."""
     if not WATSONX_PROJECT_ID:
         raise ToolError("WATSONX_PROJECT_ID is not set", code="CONFIG_MISSING")
-    
+
     model = model_id or WATSONX_DEFAULT_MODEL
     _assert_model_allowed(model)
-    
+
     token = await _get_iam_token()
-    
+
     body = {
         "model_id": model,
         "input": prompt,
@@ -118,7 +118,7 @@ async def _generate_text(
             "temperature": temperature,
         },
     }
-    
+
     async with httpx.AsyncClient(base_url=WATSONX_URL.rstrip("/"), timeout=TIMEOUT_S) as http:
         resp = await http.post(
             "/ml/v1/text/generation?version=2024-05-31",
@@ -130,7 +130,7 @@ async def _generate_text(
             json=body,
         )
         if resp.status_code >= 400:
-            detail = resp.text[:500]
+            resp.text[:500]
             raise ToolError(
                 f"watsonx generation failed ({resp.status_code})",
                 code="WATSONX_GENERATION_FAILED",
@@ -162,9 +162,9 @@ Program: {program}
 Paragraph: {paragraph}
 
 Provide a concise summary that explains what this paragraph does, focusing on business logic and data flow."""
-    
+
     result = await _generate_text(prompt, max_new_tokens=200, temperature=0.2)
-    
+
     return {
         "program": program,
         "paragraph": paragraph,
@@ -202,9 +202,9 @@ Provide a clear explanation of:
 1. What this field represents
 2. Its data type and structure
 3. How it's used in the code"""
-    
+
     result = await _generate_text(prompt, max_new_tokens=300, temperature=0.2)
-    
+
     return {
         "field_name": field_name,
         "shop": shop,

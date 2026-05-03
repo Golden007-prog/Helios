@@ -16,9 +16,10 @@ Public surface — the only thing dependencies.py imports:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from functools import lru_cache
 from typing import Any
@@ -129,10 +130,8 @@ class JobRunner:
     async def wait(self, job_id: str, timeout: float | None = None) -> JobRecord:
         task = self._tasks.get(job_id)
         if task is not None:
-            try:
+            with contextlib.suppress(TimeoutError, asyncio.CancelledError):
                 await asyncio.wait_for(asyncio.shield(task), timeout=timeout)
-            except (asyncio.TimeoutError, asyncio.CancelledError):
-                pass
         rec = self._records.get(job_id)
         if rec is None:
             raise HeliosError(ErrorCode.EVENT_NOT_FOUND, f"No job {job_id!r}")
@@ -148,7 +147,7 @@ class JobRunner:
         except asyncio.CancelledError:
             rec.state = JobState.CANCELLED
             raise
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             rec.state = JobState.FAILED
             rec.error = str(exc)
             _log.error("job.failed", job_id=rec.job_id, kind=rec.kind, error=str(exc))
@@ -183,4 +182,4 @@ def reset_job_runner() -> None:
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")

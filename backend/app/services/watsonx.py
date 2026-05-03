@@ -90,7 +90,7 @@ class WatsonxClient:
         try:
             await self._iam_token_value()
             return True, "iam reachable"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return False, str(exc)
 
     # --- IAM ---------------------------------------------------------------
@@ -230,7 +230,7 @@ class WatsonxClient:
             async for line in resp.aiter_lines():
                 if not line or not line.startswith("data: "):
                     continue
-                payload = line[len("data: "):].strip()
+                payload = line[len("data: ") :].strip()
                 if payload == "[DONE]":
                     break
                 try:

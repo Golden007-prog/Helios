@@ -37,11 +37,11 @@ class RuleContext:
     """Everything a rule may read."""
 
     jcl_source: str
-    target_region: "RegionProfile | None"
+    target_region: RegionProfile | None
     region_name: str | None
     jcl_name: str | None
-    cloudant: "CloudantClient | None"
-    watsonx: "WatsonxClient | None"
+    cloudant: CloudantClient | None
+    watsonx: WatsonxClient | None
 
 
 @dataclass

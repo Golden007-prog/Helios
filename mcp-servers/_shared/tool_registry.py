@@ -139,7 +139,9 @@ def run_cli(registry: ToolRegistry, argv: list[str] | None = None) -> int:
         try:
             result = asyncio.run(tool.call(arguments))
         except ToolError as exc:
-            print(json.dumps({"error": {"code": exc.code, "message": exc.message}}), file=sys.stderr)
+            print(
+                json.dumps({"error": {"code": exc.code, "message": exc.message}}), file=sys.stderr
+            )
             return 1
         print(json.dumps(result, default=str, indent=2))
         return 0

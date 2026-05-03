@@ -10,15 +10,14 @@ for resilience tests to exercise reconnect-with-backoff.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
-from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect, status
 
-from app.dependencies import _audit_singleton  # only for type — not used for auth
 from app.config import get_settings
-from app.services.auth import decode_token
 from app.logging import get_logger
+from app.services.auth import decode_token
 
 router = APIRouter()
 _log = get_logger("helios.ws")
@@ -41,10 +40,8 @@ class QueueBroadcaster:
         return q
 
     def unsubscribe(self, q: asyncio.Queue[dict]) -> None:
-        try:
+        with contextlib.suppress(ValueError):
             self._queues.remove(q)
-        except ValueError:
-            pass
 
     async def publish(self, event: dict) -> None:
         for q in list(self._queues):
@@ -66,7 +63,7 @@ async def ws_queue(websocket: WebSocket, token: str = Query(...)) -> None:
     settings = get_settings()
     try:
         user = decode_token(token, settings)
-    except Exception as exc:  # noqa: BLE001
+    except Exception:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="invalid token")
         return
 

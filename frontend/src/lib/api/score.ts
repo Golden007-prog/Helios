@@ -26,7 +26,5 @@ export async function computeScore(req: ScoreRequest): Promise<ScoreResponse> {
 }
 
 export async function getRegionWeights(region: string): Promise<Record<string, number>> {
-  return apiRequest<Record<string, number>>(
-    `/api/score/weights/${encodeURIComponent(region)}`,
-  );
+  return apiRequest<Record<string, number>>(`/api/score/weights/${encodeURIComponent(region)}`);
 }
