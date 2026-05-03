@@ -9,6 +9,12 @@ concurrency:
   group: pr-${{ github.ref }}
   cancel-in-progress: true
 
+# Test files are gitignored per the team policy at .gitignore §"Per team
+# decision: test files do not ship to GitHub. They still run locally..."
+# (lines 253-274). The CI test steps below probe for tests on the checkout
+# and skip with a notice when none are present, so the pipeline stays
+# green and would re-engage automatically if the policy is later flipped.
+
 jobs:
   backend:
     name: Backend (ruff + mypy + pytest)
@@ -28,11 +34,16 @@ jobs:
       - name: Type check (mypy)
         working-directory: backend
         run: mypy app
-      - name: Tests (pytest)
+      - name: Tests (pytest, when tests are present)
         working-directory: backend
-        run: pytest --cov=app --cov-report=xml
+        run: |
+          if compgen -G "tests/test_*.py" > /dev/null; then
+            pytest --cov=app --cov-report=xml
+          else
+            echo "::notice::backend/tests/ is gitignored — skipping pytest (run locally with 'cd backend && pytest')"
+          fi
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && hashFiles('backend/coverage.xml') != ''
         with:
           name: backend-coverage
           path: backend/coverage.xml
@@ -45,10 +56,15 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11", cache: pip }
       - run: pip install -e "mcp-servers[dev]"
-      - working-directory: mcp-servers
+      - name: Lint + tests (when present)
+        working-directory: mcp-servers
         run: |
           ruff check .
-          pytest
+          if compgen -G "*/tests/test_*.py" > /dev/null || compgen -G "tests/test_*.py" > /dev/null; then
+            pytest
+          else
+            echo "::notice::mcp-servers/tests gitignored — skipping pytest"
+          fi
 
   shared-codegen:
     name: Shared — typegen up to date
@@ -83,4 +99,15 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
-      - run: npm test
+      - name: Vitest (when tests are present)
+        run: |
+          # vitest fails with exit 1 when zero test files are discovered.
+          # The team policy gitignores test files; skip cleanly when none
+          # are present in the checkout.
+          if compgen -G "src/**/*.test.ts*" > /dev/null 2>&1 || \
+             find src -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | grep -q .; then
+            npm test
+          else
+            echo "::notice::frontend test files gitignored — skipping vitest"
+          fi
+        shell: bash
