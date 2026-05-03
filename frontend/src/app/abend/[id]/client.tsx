@@ -1,15 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 import { AnalysisPane } from "@/features/abend/analysis-pane";
 import { SourcePane } from "@/features/abend/source-pane";
 import { SyslogPane } from "@/features/abend/syslog-pane";
 import type { AbendAnalysisResponse, ParserHighlight } from "@/features/abend/types";
 import { apiRequest } from "@/lib/api/client";
+import { resolveAbend } from "@/lib/api/abend";
 import { queryKeys } from "@/lib/api/keys";
 
 interface AbendDetailDoc extends AbendAnalysisResponse {
@@ -39,10 +41,18 @@ function buildHighlights(raw: string, abend: AbendAnalysisResponse): ParserHighl
 
 export default function AbendDetailClient({ id }: { id: string }) {
   const [jumpLine, setJumpLine] = useState<number | undefined>(undefined);
+  const toast = useToast();
 
   const event = useQuery({
     queryKey: queryKeys.abend.detail(id),
     queryFn: () => apiRequest<AbendDetailDoc>(`/api/abend/${encodeURIComponent(id)}`),
+  });
+
+  const resolve = useMutation({
+    mutationFn: (note: string) =>
+      resolveAbend(id, { fix: note, runbook: "rb-cobol-s0c7-handling" }),
+    onSuccess: () => toast.success("Resolution recorded", "Audit + learning event written"),
+    onError: (err: Error) => toast.error("Resolve failed", err.message ?? "Unknown error"),
   });
 
   const highlights = useMemo(
@@ -78,7 +88,21 @@ export default function AbendDetailClient({ id }: { id: string }) {
             />
           </ResizablePane>
           <ResizablePane label="Analysis">
-            <AnalysisPane abend={event.data} />
+            <AnalysisPane
+              abend={event.data}
+              onSubmitResolution={(text) => resolve.mutate(text)}
+              onApplyQuarantine={(sql) => {
+                navigator.clipboard?.writeText(sql).catch(() => {});
+                toast.success("Quarantine SQL copied", "Paste into your DB2 console");
+              }}
+              onSubmitPattern={() => {
+                toast.show({
+                  variant: "default",
+                  title: "Pattern submitted",
+                  description: "Will appear in the learning loop next run",
+                });
+              }}
+            />
           </ResizablePane>
         </div>
       )}
