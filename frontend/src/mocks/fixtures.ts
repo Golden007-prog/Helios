@@ -147,14 +147,16 @@ export const HERO_ABEND: AbendEvent = {
 
 export const HERO_QUEUE: QueueItem[] = [
   {
-    event_id: "queue:demo:0001",
+    // ID is colon-free so cards can deep-link without hitting the SPA
+    // fallback on the deployed Pages site.
+    event_id: "queue-demo-0001",
     state: "pending_review",
     type: "promote_request",
     initiator: "maya@meridianbank.demo",
     reviewers: ["anil@meridianbank.demo"],
     created_at: new Date().toISOString(),
     payload: {
-      jcl: "CUST_DELETE_INACTIVE",
+      jcl: "ZBNKDEL",
       target_region: "int3",
       score: 62,
       top_reasons: ["Backup gap (-30)", "Copybook drift (-10)", "JES class T → P (-3)"],

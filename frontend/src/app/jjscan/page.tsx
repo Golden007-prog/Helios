@@ -13,11 +13,15 @@ import { useToast } from "@/components/ui/toast";
 import { submitScan } from "@/lib/api/jjscan";
 import { listRegions } from "@/lib/api/regions";
 import { queryKeys } from "@/lib/api/keys";
+import { BANKDEMO_JCLS } from "@/mocks/bankdemo-samples";
+
+const DEFAULT_SAMPLE = BANKDEMO_JCLS[0]!;
 
 export default function JjscanPage() {
   const router = useRouter();
   const toast = useToast();
-  const [source, setSource] = useState("");
+  const [source, setSource] = useState<string>(DEFAULT_SAMPLE.source);
+  const [sampleName, setSampleName] = useState<string>(DEFAULT_SAMPLE.name);
   const [region, setRegion] = useState("int3");
 
   const regions = useQuery({
@@ -34,6 +38,13 @@ export default function JjscanPage() {
     onError: (err: Error) => toast.error("Submit failed", err.message),
   });
 
+  function pickSample(name: string) {
+    const sample = BANKDEMO_JCLS.find((s) => s.name === name);
+    if (!sample) return;
+    setSampleName(name);
+    setSource(sample.source);
+  }
+
   return (
     <>
       <PageHeader title="JJSCAN+" description="Static JCL analysis for the four seeded rules." />
@@ -45,6 +56,24 @@ export default function JjscanPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
+            <div className="grid gap-1.5">
+              <Label htmlFor="sample">BankDemo sample (optional)</Label>
+              <select
+                id="sample"
+                className="h-9 w-full rounded-md border border-border bg-bg-elev px-3 text-sm"
+                value={sampleName}
+                onChange={(e) => pickSample(e.target.value)}
+              >
+                {BANKDEMO_JCLS.map((s) => (
+                  <option key={s.name} value={s.name}>
+                    {s.name} — {s.description}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-fg-muted">
+                Real JCL pulled from the Rocket BankDemo corpus. Edit the textarea to scan your own.
+              </p>
+            </div>
             <div className="grid gap-1.5">
               <Label htmlFor="region">Target region</Label>
               <select
@@ -68,6 +97,7 @@ export default function JjscanPage() {
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
                 placeholder="//FOO    JOB ..."
+                className="font-mono text-xs"
               />
             </div>
             <div className="flex justify-end">

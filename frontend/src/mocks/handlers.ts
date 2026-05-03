@@ -98,17 +98,22 @@ export const handlers = [
   }),
 
   // --- JJSCAN+ ----------------------------------------------------------
+  // The job_id matches a pre-rendered static route in the Pages build
+  // (see frontend/src/app/jjscan/[id]/page.tsx). Colons are unsafe in
+  // Windows static-export filenames, so we emit ``job-mock`` rather than
+  // ``job:mock``.
   http.post(`${API}/api/scan`, () =>
     envelope({
+      job_id: "job-mock",
       findings: HERO_FINDINGS,
       scan_duration_ms: 42,
     }),
   ),
-  http.get(`${API}/api/scan/:id`, () =>
+  http.get(`${API}/api/scan/:id`, ({ params }) =>
     envelope({
-      job_id: "job:mock",
+      job_id: String(params.id),
       state: "succeeded",
-      jcl_name: "CUST_DELETE_INACTIVE",
+      jcl_name: "ZBNKDEL",
       target_region: "int3",
       created_at: new Date().toISOString(),
       finished_at: new Date().toISOString(),
@@ -186,8 +191,28 @@ export const handlers = [
   ),
 
   // --- ABEND ------------------------------------------------------------
-  http.post(`${API}/api/abend`, () => envelope(HERO_ABEND_ANALYSIS)),
-  http.get(`${API}/api/abend/history`, () => envelope({ events: [HERO_ABEND] })),
+  // event_id matches a pre-rendered route in the Pages build (see
+  // frontend/src/app/abend/[id]/page.tsx). Colon-free for Windows
+  // static-export compatibility.
+  http.post(`${API}/api/abend`, () =>
+    envelope({
+      event_id: "abend-demo-0001",
+      abend_code: "S0C7",
+      program: "BBANK40P",
+      tier: "confirmed",
+      summary: HERO_ABEND_ANALYSIS.business_rule_explanation,
+    }),
+  ),
+  http.get(`${API}/api/abend/history`, () =>
+    envelope({
+      events: [
+        {
+          ...HERO_ABEND,
+          event_id: "abend-demo-0001",
+        },
+      ],
+    }),
+  ),
   http.get(`${API}/api/abend/:id`, () =>
     envelope({
       ...HERO_ABEND_ANALYSIS,
