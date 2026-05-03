@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!--
+  GitHub Pages SPA fallback.
+
+  Static export pre-renders a fixed set of dynamic-route segments via
+  generateStaticParams. Any URL outside that set (e.g. /Helios/jjscan/<runtime-id>/)
+  hits this page. We capture the path + query, redirect to the SPA root
+  with the original location encoded, and a snippet in the root index
+  reads it back via history.replaceState so client-side routing picks up
+  the right page.
+
+  Pattern documented at https://github.com/rafgraph/spa-github-pages.
+  PATH_SEGMENTS_TO_KEEP = 1 because the site is hosted under /Helios.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Helios — loading…</title>
+    <script type="text/javascript">
+      // Keep the basePath segment (e.g. "/Helios"); drop everything beneath it
+      // into the query string for the root page to recover.
+      var pathSegmentsToKeep = 1;
+      var l = window.location;
+      l.replace(
+        l.protocol +
+          "//" +
+          l.hostname +
+          (l.port ? ":" + l.port : "") +
+          l.pathname
+            .split("/")
+            .slice(0, 1 + pathSegmentsToKeep)
+            .join("/") +
+          "/?p=/" +
+          l.pathname
+            .split("/")
+            .slice(1 + pathSegmentsToKeep)
+            .join("/")
+            .replace(/&/g, "~and~") +
+          (l.search ? "&q=" + l.search.slice(1).replace(/&/g, "~and~") : "") +
+          l.hash,
+      );
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <p>This site requires JavaScript. Open <a href="/Helios/">/Helios/</a>.</p>
+    </noscript>
+  </body>
+</html>

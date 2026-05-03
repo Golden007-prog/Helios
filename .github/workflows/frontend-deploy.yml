@@ -46,6 +46,13 @@ jobs:
         run: npm run build
       - name: Add .nojekyll
         run: touch out/.nojekyll
+      - name: Install SPA fallback 404.html
+        # Next's static export writes its own ``404.html`` from the default
+        # not-found page, overwriting whatever was in ``public/``. Restore
+        # the SPA bootloader so unknown deep links (e.g. runtime IDs from
+        # MSW) bounce through ``/Helios/?p=/<path>`` and the layout
+        # snippet rewrites the URL on the client.
+        run: cp public/404.html out/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/out

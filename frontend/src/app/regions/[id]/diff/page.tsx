@@ -2,10 +2,12 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import RegionDiffClient from "./client";
 
-export const dynamicParams = true;
+const REGION_IDS = ["sandbox", "dev1", "dev2", "int2", "int3", "prod", "dr"] as const;
+
+export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return [{ id: "placeholder" }];
+  return REGION_IDS.map((id) => ({ id }));
 }
 
 export default function RegionDiffPage({ params }: { params: { id: string } }) {
